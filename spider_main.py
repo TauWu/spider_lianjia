@@ -5,7 +5,7 @@ from spider_page import getHouseInfo
 from spider_page import getHouseInfoOther
 import time
 
-busi_area = ["caohejing"]
+busi_area = ["caohejing","wujiaochang"]
 
 # 通过文件来中转 监控程序运行情况
 def create_task(busi_area):
@@ -17,16 +17,16 @@ def create_task(busi_area):
 
 # 读取文件内部URL以发起请求
 def do_task():
+    with open("result.csv","a+") as result:
+        result.write("编号,价格,户型,面积,楼层,朝向,行政区,商圈,上线日期,地标名称,地标地址\n")
     with open("urls.req","r") as f:
         urls = f.readlines()
-        print("******",urls)
         if len(urls) != 0:
             for url in urls:
                 try:
                     info = getHouseInfo(url[:-1])
                     with open("result.csv","a+") as result:
                         result.write(info)
-                    time.sleep(0.5)
                 except AttributeError:
                     try:
                         info = getHouseInfoOther(url[:-1])
@@ -36,7 +36,7 @@ def do_task():
                         with open("errs.req","a+") as err:
                             err.write(url)
                 finally:
-                    time.sleep(0.5)
+                    time.sleep(0.3)
 
         else:
             print("urls.req文件为空，请检查")

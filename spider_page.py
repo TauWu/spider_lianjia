@@ -19,15 +19,19 @@ def getHouseInfo(url):
     if rent_info is None: # 针对特殊的自如整租所做的防御
         rent_info = raw_bs.findChild("div",{"class":"zf-top"}).findChild("div",{"class":"cj-cun"}).findChild("div",{"class","content"})
     house_info = rent_info.findChild("div",{"class":"houseInfo"})
+    house_price = None
     if house_info is None: # 针对特殊的自如整租所做的防御
         house_info = rent_info.findChild("div",{"class":"houseInfo ziru_zhengzu"})
+        house_price = re.findall("""<div class="mainInfo bold" style="font-size:28px;">(.+)<span.+</div>""",str(house_info.findChild("div",{"class":"price"}).findChild("div",{"class":"mainInfo bold"})))
+        house_price = "%s元/月(季付)"%(house_price[0])
     around_info = rent_info.findChild("table",{"class":"aroundInfo"}).findChildren("tr")
 
 
     # 获取实际需要爬取的信息
     # 房间价格
-    house_price = re.findall("""<div class="mainInfo bold" style="font-size:28px;">(.+)<span.+</div>""",str(house_info.findChild("div",{"class":"price"}).findChild("div",{"class":"mainInfo bold"})))
-    house_price = "%s元/月"%(house_price[0])
+    if house_price is None:
+        house_price = re.findall("""<div class="mainInfo bold" style="font-size:28px;">(.+)<span.+</div>""",str(house_info.findChild("div",{"class":"price"}).findChild("div",{"class":"mainInfo bold"})))
+        house_price = "%s元/月"%(house_price[0])
     # 房间信息（几室几厅）
     room_info = re.findall("""<div class="mainInfo">(.+)<span class="unit">室</span>(.+)<span class="unit">厅</span></div>""",str(house_info.findChild("div",{"class":"room"}).findChild("div",{"class":"mainInfo"})))
     room_info = "%s室%s厅"%(room_info[0][0],room_info[0][1])
