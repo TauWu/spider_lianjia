@@ -1,61 +1,46 @@
-# -*- coding: utf-8 -*-
-import requests
-from bs4 import BeautifulSoup
-import re
+# -*- coding:utf-8 -*-
 
-headers = {
-    "User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36"
-}
+from select_url import get_urls
+from spider_page import getHouseInfo
+from spider_page import getHouseInfoOther
+import time
 
+busi_area = ["caohejing"]
 
-def getHouseInfo(url):
-    # 获取网页基础信息
-    raw_text = requests.get(url, headers=headers).text
-    raw_bs = BeautifulSoup(raw_text)
-    rent_info = raw_bs.findChild("div",{"class":"zf-top"}).findChild("div",{"class":"cj-cun"}).findChild("div",{"class","content forRent"})
-    house_info = rent_info.findChild("div",{"class":"houseInfo"})
-    around_info = rent_info.findChild("table",{"class":"aroundInfo"}).findChildren("tr")
+# 通过文件来中转 监控程序运行情况
+def create_task(busi_area):
+    urls = list()
+    for busi in busi_area:
+        urls += get_urls(busi)
+    with open("urls.req","w") as f:
+        f.writelines(urls)
 
+# 读取文件内部URL以发起请求
+def do_task():
+    with open("urls.req","r") as f:
+        urls = f.readlines()
+        print("******",urls)
+        if len(urls) != 0:
+            for url in urls:
+                try:
+                    info = getHouseInfo(url[:-1])
+                    with open("result.csv","a+") as result:
+                        result.write(info)
+                    time.sleep(0.5)
+                except AttributeError:
+                    try:
+                        info = getHouseInfoOther(url[:-1])
+                        with open("result.csv","a+") as result:
+                            result.write(info)
+                    except AttributeError:
+                        with open("errs.req","a+") as err:
+                            err.write(url)
+                finally:
+                    time.sleep(0.5)
 
-    # 获取实际需要爬取的信息
-    # 房间价格
-    house_price = re.findall("""<div class="mainInfo bold" style="font-size:28px;">(.+)<span.+</div>""",str(house_info.findChild("div",{"class":"price"}).findChild("div",{"class":"mainInfo bold"})))
-    house_price = "%s元/月,"%(house_price[0])
-    # 房间信息（几室几厅）
-    room_info = re.findall("""<div class="mainInfo">(.+)<span class="unit">室</span>(.+)<span class="unit">厅</span></div>""",str(house_info.findChild("div",{"class":"room"}).findChild("div",{"class":"mainInfo"})))
-    room_info = "%s室%s厅,"%(room_info[0][0],room_info[0][1])
-    # 房间面积
-    room_area = re.findall("""<div class="mainInfo">(.+)<span class="unit">平</span></div>""",str(house_info.findChild("div",{"class":"area"}).findChild("div",{"class":"mainInfo"})))
-    room_area = "%s平,"%(room_area[0])
-
-    # 解析第一行数据
-    tb1 = around_info[0].findChildren("td",{"width":"50%"})
-    room_floor = re.findall("""<td width="50%">(.+)</td>""", str(tb1[0]))[0]
-    room_ori = str(re.findall("""<td width="50%">([\s\S]*)</td>""", str(tb1[1]))).replace(" ","").replace("\\n","").replace("\\t","")[2:-2]
-
-    # 解析第二行数据
-    tb2 = around_info[1].findChildren("td",{"width":"50%"})
-    room_location = re.findall("""<td width="50%"><a href=".+" target="_blank">(.+)</a> <a href=".+" target="_blank">(.+)</a></td>""", str(tb2))
-    sell_time = re.findall("""<td width="50%">(.+)</td>""", str(tb2[1]))[0]
-
-    # 解析第三行数据
-    tb3 = around_info[2].findChild("p",{"class","addrEllipsis"})
-    community_name = re.findall("""<p class="addrEllipsis" title="(.+)">[\s\S]*""", str(tb3))[0]
-
-    # 解析第四行数据
-    tb4 = around_info[3].findChild("p",{"class","addrEllipsis"})
-    community_addr = re.findall("""<p class="addrEllipsis" title="(.+)">[\s\S]*""", str(tb4))[0]
-
-
-    return {"HousePrice" :house_price,
-    "RoomInfo" :room_info,
-    "RoomArea" :room_area,
-    "RoomFloor":room_floor,
-    "RoomOri": room_ori,
-    "RoomLocation":room_location,
-    "SellTime": sell_time,
-    "CommunityName": community_name,
-    "CommunityAddr": community_addr}
+        else:
+            print("urls.req文件为空，请检查")
 
 if __name__ == "__main__":
-    print(getHouseInfo("http://sh.lianjia.com/zufang/shz4223367.html"))
+    create_task(busi_area)
+    do_task()
