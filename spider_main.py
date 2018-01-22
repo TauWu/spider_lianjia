@@ -2,6 +2,7 @@
 
 from module.spider.select_url import create_urls
 from module.spider.spider_page import getHouseInfo, getHouseInfoOther
+from util.web.proxies import get_ip_file
 import time
 
 busi_area = ["caohejing"]
@@ -37,5 +38,6 @@ def do_task():
             print("urls.req文件为空，请检查")
 
 if __name__ == "__main__":
-    create_task(busi_area)
-    do_task()
+    # create_task(busi_area)
+    # do_task()
+    get_ip_file()
