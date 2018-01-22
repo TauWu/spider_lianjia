@@ -34,7 +34,7 @@ def getHouseInfo(url):
         house_price = "%s元/月"%(house_price[0])
     # 房间信息（几室几厅）
     room_info = re.findall("""<div class="mainInfo">(.+)<span class="unit">室</span>(.+)<span class="unit">厅</span></div>""",str(house_info.findChild("div",{"class":"room"}).findChild("div",{"class":"mainInfo"})))
-    room_info = "%s室%s厅"%(room_info[0][0],room_info[0][1])
+    room_info = "%s室 %s厅"%(room_info[0][0],room_info[0][1])
     # 房间面积
     room_area = re.findall("""<div class="mainInfo">(.+)<span class="unit">平</span></div>""",str(house_info.findChild("div",{"class":"area"}).findChild("div",{"class":"mainInfo"})))
     room_area = "%s平"%(room_area[0])
@@ -128,4 +128,4 @@ def getHouseInfoOther(url):
 
 
 if __name__ == "__main__":
-    print(getHouseInfo("http://sh.lianjia.com/zufang/shzr100023664.html"))
+    print(getHouseInfo("http://sh.lianjia.com/zufang/shz4412899.html"))

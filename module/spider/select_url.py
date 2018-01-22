@@ -2,8 +2,9 @@
 
 import requests
 from bs4 import BeautifulSoup
-from spider_page import headers
+from .spider_page import headers
 import re
+import random, time
 
 # 获取该搜索条件下拥有的房间数目
 def get_pages(busi_area):
@@ -26,7 +27,7 @@ def get_urls_page(select_url):
     for room_info in room_list:
         url_info = room_info.findChild("div",{"class","info-panel"}).findChild("h2").findChild("a",{"class":"js_triggerGray js_fanglist_title"})
         url = re.findall(""".+href=\"(.+).html\"""",str(url_info))[0]
-        urls.append(url_template.format(url=url))
+        urls += url_template.format(url=url)
     return urls
 
 # 获取所有的URL
@@ -36,8 +37,31 @@ def get_urls(busi_area):
     urls = list()
     for i in range(1,page_amount+1):
         select_url = raw_select_url.format(busi_area=busi_area, page=i)
-        urls += get_urls_page(select_url)
-    return urls
+        time.sleep(random.randint(0,2))
+        url_add = get_urls_page(select_url)
+        yield url_add
+
+# 将迭代器中获取到的需要爬取的URL信息写入到文件中
+def wirte_urls(url_add):
+    with open("./output/urls.req","a+") as url:
+        url.writelines(url_add)
+
+# 将大批量的数据分批存入文件可能更可靠（？）
+def create_urls(busi_area):
+    for busi in busi_area:
+        url_add = get_urls(busi)
+        while True:
+            try:
+                wirte_urls(next(url_add))
+            except StopIteration:
+                print("迭代结束")
+                break
 
 if __name__ == "__main__":
-    print(get_urls("caohejing"))
+    urls = get_urls("caohejing")
+    while True:
+        try:
+            wirte_urls(next(urls))
+        except StopIteration:
+            print("迭代结束")
+            break
