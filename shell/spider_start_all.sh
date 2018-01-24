@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd ..
-python3 spider_main.py
+python3 spider_main.py all

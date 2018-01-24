@@ -58,10 +58,13 @@ if __name__ == "__main__":
 
         if operation == "create":
         # python3 spider_main.py create
-            print(Argv)
             if Argv == "":
-                confirm = input("即将爬取链家网当前所有在售房源URL，请确定。（Y/N）")
-                if confirm.strip() == "Y":
+                Argv = input("请输入待爬取商圈的拼音")
+                if Argv == "":
+                    confirm = input("即将爬取链家网当前所有在售房源URL，请确定。（Y/N）")
+                    if confirm.strip() == "Y":
+                        create_task([Argv])
+                else:
                     create_task([Argv])
             else:
                 create_task([Argv])
