@@ -5,7 +5,7 @@ import sys
 import csv
 
 from module.spider.select_url import create_urls
-from module.spider.spider_page import getHouseInfo, getHouseInfoOther
+from module.spider.spider_page import getHouseInfo
 from util.web.proxies import get_ip_file
 
 # 通过文件来中转 监控程序运行情况
@@ -20,20 +20,11 @@ def do_task():
         urls = f.readlines()
         if len(urls) != 0:
             for url in urls:
-                try:
-                    info = getHouseInfo(url[:-1])
-                    with open("./output/result.csv","a+") as result:
-                        result.write(info)
-                except AttributeError:
-                    try:
-                        info = getHouseInfoOther(url[:-1])
-                        with open("./output/result.csv","a+") as result:
-                            result.write(info)
-                    except AttributeError:
-                        with open("./output/errs.req","a+") as err:
-                            err.write(url)
-                finally:
-                    time.sleep(0.3)
+                info = getHouseInfo(url[:-1])
+                with open("./output/result.csv","a+") as result:
+                    result.write(str(info))
+                    result.write("\n")
+                time.sleep(0.3)
 
         else:
             print("urls.req文件为空，请检查")
