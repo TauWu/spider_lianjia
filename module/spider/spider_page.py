@@ -5,6 +5,8 @@ import requests
 from bs4 import BeautifulSoup
 import re
 
+from pprint import pprint
+
 #TODO 后期请求附加参数将从cheat模块中获取
 headers = {
     "User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36"
@@ -31,7 +33,6 @@ headers = {
 
 # "LianjiaExtra": 链家整租的其他信息
     # "HouseTypePic":户型图 - 链家整租有
-    # "HouseTypeDetail":户型分间详情 - 链家整租有
 # "ZiruExtra":自如整租、合租的其他信息
     # "HouseBasicInfo": 房源基础信息 - 自如合租、自如整租有
     # "HousePayInfo":房源支付信息 - 自如整租、自如合租有
@@ -62,6 +63,14 @@ def getHouseInfo(url):
     # 房源来源信息
     cj_cun_soup = raw_bs.findChild("div",{"class":"zf-top"}).findChild("div",{"class":"cj-cun"})
     content_soup = None
+
+    # 上下架信息
+    house_status_soup = cj_cun_soup.findChild("div",{"class":"album-box"}).findChild("div",{"class":"album-box left"}).findChild("div",{"class":"pic-panel pic-panel-hover"}).findChild("div",{"class":"tag tag_yixiajia"})
+
+    house_status = 1
+
+    if house_status_soup is None:
+        house_status = 2
 
     if house_source == 1:
         content_soup = cj_cun_soup.findChild("div",{"class":"content forRent"})
@@ -105,33 +114,38 @@ def getHouseInfo(url):
     house_lat_posi = re.findall(posi_lat_compile, str(posi_soup))[0][0]
 
     house_posi = {
-        "latitude":house_lat_posi,
-        "longitude":house_lng_posi
+        "Latitude":house_lat_posi,
+        "Longitude":house_lng_posi
     }
 
     # 带看记录信息
     see_count = None
     see_count_seven_days = None
     if house_source == 1:
-        see_soup = raw_bs.findChild("div",{"class","record js_content"}).findChild("div",{"class","panel"})
+        try:
+            see_soup = raw_bs.findChild("div",{"class","record js_content"}).findChild("div",{"class","panel"})
 
-        see_count_seven_days_soup = see_soup.findChild("div", {"class":"count"})
-        see_count_soup = see_soup.findChild("div",{"class","totalCount"}).findChild("span")
+            see_count_seven_days_soup = see_soup.findChild("div", {"class":"count"})
+            see_count_soup = see_soup.findChild("div",{"class","totalCount"}).findChild("span")
 
-        see_count = re.findall("([0-9]+)",str(see_count_soup))[0]
-        see_count_seven_days = re.findall("([0-9]+)",str(see_count_seven_days_soup))[0]
+            see_count = re.findall("([0-9]+)",str(see_count_soup))[0]
+            see_count_seven_days = re.findall("([0-9]+)",str(see_count_seven_days_soup))[0]
+        
+        except AttributeError:
+            pass
     
     # 其他信息获取
     lianjia_extra = dict()
     ziru_extra = dict()
     if house_source != 1:
+        # 获取自如的其他信息
         introduction_soup = raw_bs.findChild("div",{"id":"introduction"}).findChild("div",{"class":"introduction"}).findChild("div",{"class":"introContent"})
         # 获取基本属性
         try:
             house_basic_info_soup = introduction_soup.findChild("div",{"class":"base baseFull"}).findChild("div",{"class":"content"}).findChild("ul").findChildren("li")
             house_basic_info_compile = re.compile("([\u4e00-\u9fa5]+)")
             house_basic_info = [house_basic_info for house_basic_info in re.findall(house_basic_info_compile, str(house_basic_info_soup))][1::2]
-            ziru_extra["house_basic_info"] = ",".join(house_basic_info)
+            ziru_extra["HouseBasicInfo"] = ",".join(house_basic_info)
         except AttributeError:
             pass
 
@@ -143,7 +157,7 @@ def getHouseInfo(url):
             for i in range (0, len(house_feature_info_soup)):
                 house_feature_info = re.findall(house_feature_info_compile, str(house_feature_info_soup[i]))
                 house_feature_infos += house_feature_info
-            ziru_extra["house_feature_info"] = house_feature_infos
+            ziru_extra["HouseFeatureInfo"] = house_feature_infos
         except AttributeError:
             pass
 
@@ -156,39 +170,44 @@ def getHouseInfo(url):
                 payment = list(re.findall(payment_compile, str(payment_soup[i]).strip().replace('\n',''))[0])
                 payment = {"方式":payment[0],"租金":payment[1],"押金":payment[2],"服务费":payment[3]}
                 payment_list.append(payment)
-            ziru_extra["payment_list"] = payment_list
+            ziru_extra["PaymentList"] = payment_list
 
         except AttributeError:
             pass
 
     else:
-        pass
+        # 链家其他信息获取
+        try:
+            house_type_pic_soup = raw_bs.findChild("div",{"class":"content-wrapper huxing js_content"}).findChild("div",{"class":"container"}).findChild("div",{"class":"hx_pic"}).findChild("a")
 
-    print(house_id, title, house_source, basic_info, house_posi, see_count, see_count_seven_days, ziru_extra)
-    print('\n')
+            house_type_pic_compile = re.compile(".+href=\"(.+)\" target=.+")
+            house_type_pic = re.findall(house_type_pic_compile, str(house_type_pic_soup))[0]
+            lianjia_extra["HouseTypePic"] = house_type_pic
+        except AttributeError:
+            pass
+
+    # print(house_id, title, house_source, basic_info, house_posi, see_count, see_count_seven_days, ziru_extra, lianjia_extra)
 
     return {
         "HouseID":house_id,
-        "HouseSource":"房源来源",
-        "HouseStatus":"房源状态",
-        "Title":" 房间详情页标题",
-        "HousePrice":"租金",
-        "HouseType":"户型",
-        "HouseTypePic":"户型图",
-        "HouseTypeDetail":"户型分间详情",
-        "HouseBasicInfo":" 房源基础信息",
-        "HousePayInfo":"房源支付信息",
-        "HouseArea":"房间大小",
-        "HouseFloor":"房间楼层",
-        "HouseOri":"房间朝向",
-        "AddrRegion":"地址行政区",
-        "AddrBusi":"地址商圈",
-        "SellTime":"上架时间",
-        "CommunityName":" 地标名称",
-        "CommunityAddr":"地标地址",
-        "CommunityPosi":"地标坐标",
-        "SeeCountSevenDay":"近七天带看次数",
-        "SeeCount":"带看总数"
+        "HouseSource":house_source,
+        "HouseStatus":house_status,
+        "Title":title,
+        "HousePrice":basic_info[0],
+        "HouseType":basic_info[1],
+        "HouseArea":basic_info[2],
+        "HouseFloor":basic_info[3],
+        "HouseOri":basic_info[4],
+        "AddrRegion":basic_info[5],
+        "AddrBusi":basic_info[6],
+        "SellTime":basic_info[7],
+        "CommunityName":basic_info[8],
+        "CommunityAddr":basic_info[9],
+        "CommunityPosi":house_posi,
+        "SeeCountSevenDay":see_count_seven_days,
+        "SeeCount":see_count,
+        "ZiruExtra":ziru_extra,
+        "LianjiaExtra":lianjia_extra
     }
 
 def getHouseBasicInfoLJZZ(house_info_soup, around_info_soup):
@@ -214,7 +233,11 @@ def getHouseBasicInfoLJZZ(house_info_soup, around_info_soup):
     house_location = re.findall("""<td width="50%"><a href=".+" target="_blank">(.+)</a> <a href=".+" target="_blank">(.+)</a></td>""", str(tb2))[0]
     addr_region = house_location[0]
     addr_busi = house_location[1]
-    sell_time = re.findall("""<td width="50%">(.+)</td>""", str(tb2[1]))[0]
+    sell_time = re.findall("""<td width="50%">(.+)</td>""", str(tb2[1]))
+    if len(sell_time) != 0:
+        sell_time = sell_time[0]
+    else:
+        sell_time = None
 
     # 解析第三行数据
     tb3 = around_info_soup[2].findChild("p",{"class","addrEllipsis"})
@@ -252,7 +275,12 @@ def getHouseBasicInfoZRHZ(house_info_soup, around_info_soup):
     house_location = re.findall("""<td width="50%"><a href=".+" target="_blank">(.+)</a> <a href=".+" target="_blank">(.+)</a></td>""", str(tb3))[0]
     addr_region = house_location[0]
     addr_busi = house_location[1]
-    sell_time = re.findall("""<td width="50%">(.+)</td>""", str(tb3[1]))[0]
+    sell_time = re.findall("""<td width="50%">(.+)</td>""", str(tb3[1]))
+    sell_time = re.findall("""<td width="50%">(.+)</td>""", str(tb2[1]))
+    if len(sell_time) != 0:
+        sell_time = sell_time[0]
+    else:
+        sell_time = None
 
     # 解析第三行数据
     tb4 = around_info_soup[3].findChild("p",{"class","addrEllipsis"})
@@ -264,16 +292,15 @@ def getHouseBasicInfoZRHZ(house_info_soup, around_info_soup):
 
     return house_price, house_type, house_area, house_floor, house_ori, addr_region, addr_busi, sell_time, community_name, community_addr
 
-
-
-
 if __name__ == "__main__":
     urls = [
-        "http://sh.lianjia.com/zufang/shzr100023664.html",
+        "http://sh.lianjia.com/zufang/shz4277432.html",
+        "http://sh.lianjia.com/zufang/shz4277132.html",
         "http://sh.lianjia.com/zufang/shzr100000000.html",
         "http://sh.lianjia.com/zufang/shzr100043293.html",
         "http://sh.lianjia.com/zufang/shz4301605.html"
     ]
 
     for url in urls:
-        getHouseInfo(url)
+        pprint(getHouseInfo(url))
+        print("\n")
