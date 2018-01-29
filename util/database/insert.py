@@ -16,6 +16,7 @@ def insert_lianjia_house_json(lianjia_houseinfo):
     try:
         conn, cur = db_conn()
         cur.execute(insert_sql%(lianjia_houseinfo["HouseID"], str(lianjia_houseinfo)))
+        conn.commit()
     finally:
         cur.close()
         conn.close()
