@@ -39,3 +39,4 @@ raw_req = requests.get("http://example.com",proxies=proxies)
 ```
 #### 可以测试IP地址的API
 > [IP138](http://2017.ip138.com/ic.asp)
+> [ChinaZ](http://ip.chinaz.com/getip.aspx)

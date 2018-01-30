@@ -6,7 +6,8 @@ import csv
 
 from module.spider.select_url import create_urls
 from module.spider.spider_page import getHouseInfo
-from module.cheat.random_ip import random_ip
+
+from module.cheat.random_req import test_requests
 
 from util.database.insert import insert_lianjia_house_json
 
@@ -89,5 +90,5 @@ if __name__ == "__main__":
         
         elif operation == "test":
         # python3 spider_main.py test
-            ip = random_ip()
-            print(ip)
+            for i in range(0,100):
+                test_requests()

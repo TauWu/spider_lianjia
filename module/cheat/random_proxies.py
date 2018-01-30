@@ -21,3 +21,13 @@ def random_ip():
     with open("./output/proxies.list") as proxy:
         proxies = proxy.readlines()
     return proxies[random.randint(0,len(proxies)-1)][:-1]
+
+# 获取随机代理
+def random_proxies():
+    # 随机代理发起
+    ip = random_ip()
+    proxies = {
+        "http":"%s"%ip,
+        "https":"%s"%ip
+    }
+    return proxies
