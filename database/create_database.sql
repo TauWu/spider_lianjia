@@ -8,6 +8,7 @@ CREATE TABLE `lianjia_house_info_json` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `proxies_pool` (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `ip` varchar(20) NOT NULL COMMENT 'IP',
   `port` varchar(8) NOT NULL COMMENT '端口号',
   `type` varchar(8) NOT NULL COMMENT '代理类型',
@@ -16,5 +17,6 @@ CREATE TABLE `proxies_pool` (
   `deleted` int(11) NOT NULL DEFAULT '0' COMMENT '删除标记',
   `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最近修改时间',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  PRIMARY KEY (`ip`,`port`,`type`)
+  UNIQUE KEY (`ip`,`port`,`type`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
