@@ -1,43 +1,75 @@
-# -*- coding: utf-8 -*-
+# 本处代理使用的是 http://www.xdaili.cn/
 
+import time
+import hashlib
 import requests
-import bs4
 import re
 
-url = "http://www.xicidaili.com/nn"
+# 多线程 + 协程
+from multiprocessing import Process
+import gevent
+from gevent import monkey; monkey.patch_all()
 
-headers = {
-    "Accecpt":"text/html,application/xhtml+xml,application/xml",  
-    "Accept-Encoding":"gzip,deflate,sdch",  
-    "Accept-Language":"zh-CN,zh;q=0.8,en;q=0.6",  
-    "Referer":"http://www.xicidaili.com",  
-    "User-Agent":"Mozilla/5.0(Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36"  
-}
+# 异步HTTP请求
+import aiohttp
+import asyncio
 
-def get_ip():
-    # 获取代理IP池
-    req = requests.get(url, headers=headers)
-    bs = bs4.BeautifulSoup(req.text, "lxml")
-    data = bs.find_all("td")
-    ip_compile = re.compile(r'<td>(\d+\.\d+\.\d+\.\d+)</td>')  
-    port_compile = re.compile(r"<td>(\d+)</td>")
-    speed_compile = re.compile(r"<div class=\"bar\" title=\"(.+)秒\">")
-    ip = re.findall(ip_compile, str(data))  
-    port = re.findall(port_compile, str(data))
-    speed = re.findall(speed_compile, str(data))
-    ip_list = list()
-    for i in zip(ip, port, speed):
-        speed = float(i[2][:])
-        if speed < 1.0:
-            ip_list.append(":".join(i[:2]))
-    return ip_list
+# 配置文件
+from config import *
 
-def get_ip_file():
-    # 获取代理IP池并写入文件
-    with open("./output/proxies.list","a+") as proxy:
-        ips = get_ip()
-        for ip in ips:
-            proxy.write("%s\n"%ip)
+# 代理 用户验证部分 - 一天检查一次，所以多次调用时不重复此步骤
+timestamp = str(int(time.time()))
+string = "orderno={orderno},secret={secret},timestamp={timestamp}".format(orderno=orderno,secret=secret,timestamp=timestamp)
+string=string.encode()
+md5_string = hashlib.md5(string).hexdigest()
+sign = md5_string.upper()
+auth = "sign=%s&orderno=%s&timestamp=%s"%(sign, orderno, timestamp)
 
-if __name__ == "__main__":
-    print(get_ip())
+# requests代理设置
+proxy = {"http": "http://%s"%ip_port, "https": "https://%s"%ip_port}
+headers = {"Proxy-Authorization": auth}
+
+def fetch(url, num):
+    while True:
+        try:
+            # URL请求发送
+            r = requests.get(url, headers=headers, proxies=proxy, verify=False, allow_redirects=False, timeout=2)
+            # 正常页面请求输出
+            text = r.content.decode("gb2312")
+            ip_info = re.findall(r"<center>您的IP是：\[(.+)\] 来自：(.+)</center>", text)
+            if len(ip_info) == 0:
+                # 端口转发频率太频繁，重新发起请求
+                continue
+            print(ip_info, num)
+            break
+        except Exception:
+            print("请求超时编号%d，正在重新发起"%num)
+            # 请求超时重新发起新的请求
+            continue
+
+def process_start(tasks):
+    gevent.joinall(tasks)
+
+def task_start():
+    task_list = []
+    for i in range(0, 5):
+        task_list.append(gevent.spawn(fetch, raw_url, i))
+    # process_start(task_list)
+    for i in range(0,3):
+        p = Process(target=process_start, args=(task_list, ))
+        p.start()
+
+async def get(url, num):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            print(url, i)
+            print(url, i, await resp.text())
+
+loop = asyncio.get_event_loop()
+
+tasks = []
+for i in range(0, 20):
+    tasks.append(get(raw_url, i))
+
+loop.run_until_complete(asyncio.wait(tasks))
+loop.close()

@@ -51,4 +51,5 @@ def proxies_validator():
     return vld.test_requests()
 
 if __name__ == "__main__":
+    proxies_generator(1,3)
     proxies_validator()
