@@ -45,7 +45,7 @@ class ProxiesRequests(ProxiesHeaders):
     '''
     def __init__(self, urls=[]):
         ProxiesHeaders.__init__(self)
-        self.__urls = urls
+        self._urls = urls
         self.__auth_with_time = self.auth_with_time
         self.__proxy_auth = self.__auth_with_time[0]
         self.__timestamp = self.__auth_with_time[1]
@@ -82,7 +82,7 @@ class ProxiesRequests(ProxiesHeaders):
     def _batch_request_(self):
         '''协程执行请求 可被继承'''
         task_list = []
-        for url in self.__urls:
+        for url in self._urls:
             task_list.append(gevent.spawn(self._proxy_request_, url))
         gevent.joinall(task_list)
 
@@ -101,6 +101,7 @@ class ProxiesRequests(ProxiesHeaders):
         self.add_headers(headers_tmp)
 
 class ProxiesVaild(ProxiesRequests):
+    '''测试代理代码'''
 
     def __init__(self, num=1):
         self.vaild_urls = []

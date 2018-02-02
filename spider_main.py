@@ -7,7 +7,7 @@ import csv
 from module.spider.select_url import create_urls
 from module.spider.spider_page import getHouseInfo
 
-# from module.cheat.random_req import test_requests
+from module.cheat.random_proxies import CheatRequests
 
 from util.database.insert import insert_lianjia_house_json
 from util.web.proxies import ProxiesVaild
@@ -91,6 +91,5 @@ if __name__ == "__main__":
         
         elif operation == "test":
         # python3 spider_main.py test
-            vaild = ProxiesVaild(2)
-            content = vaild.vaild_proxies_b
-            print(content)
+            req = CheatRequests([["http://2017.ip138.com/ic.asp"]])
+            print(req.get_cheat_first_content[0].decode("gb2312"))
