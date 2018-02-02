@@ -7,9 +7,10 @@ import csv
 from module.spider.select_url import create_urls
 from module.spider.spider_page import getHouseInfo
 
-from module.cheat.random_req import test_requests
+# from module.cheat.random_req import test_requests
 
 from util.database.insert import insert_lianjia_house_json
+from util.web.proxies import ProxiesVaild
 
 # 通过文件来中转 监控程序运行情况
 def create_task(busi_area):
@@ -90,5 +91,6 @@ if __name__ == "__main__":
         
         elif operation == "test":
         # python3 spider_main.py test
-            for i in range(0,100):
-                test_requests()
+            vaild = ProxiesVaild(2)
+            content = vaild.vaild_proxies_b
+            print(content)
