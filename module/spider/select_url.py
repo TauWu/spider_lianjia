@@ -32,6 +32,8 @@ def get_urls_page(page_text):
     bs4 = BeautifulSoup(page_text, "lxml")
     urls = list()
     room_list = bs4.findChild("div",{"class":"main-box clear"}).findChild("div",{"class":"con-box"}).findChild("div",{"class":"list-wrap"}).findChild("ul",{"class","house-lst"}).findChildren("li")
+    if len(re.findall("list-no-data",str(room_list))) != 0:
+        return urls
     for room_info in room_list:
         url_info = room_info.findChild("div",{"class","info-panel"}).findChild("h2").findChild("a",{"target":"_blank"})
         url = re.findall(""".+href=\"https://sh.lianjia.com/zufang/(.+).html\"""",str(url_info))[0]
@@ -41,7 +43,7 @@ def get_urls_page(page_text):
 # 获取所有的URL
 def get_urls(busi_area):
     page_amount = get_pages(busi_area)
-    raw_select_url = "https://sh.lianjia.com/zufang/{busi_area}/pg{page}"
+    raw_select_url = "https://sh.lianjia.com/zufang/{busi_area}/pg{page}/"
     select_url_list = list()
     urls = list()
     for i in range(1,page_amount+1):
@@ -49,15 +51,15 @@ def get_urls(busi_area):
  
     req = CheatRequests([select_url_list])
 
-    print([select_url_list])
-
     contents = req.get_cheat_all_content
 
-    for page_text in contents:
-        print(page_text)
-        # a = input("DEBUG")
-        # url_add = get_urls_page(page_text)
-        # yield url_add
+    for page_texts in contents:
+        for page_text in page_texts:
+            url_add = get_urls_page(str(page_text))
+            print("本页房源数量：", len(url_add))
+            urls+=url_add
+    return urls
+
 
 # 获取上海目录下小于100页的URL段
 def get_dic_url():
@@ -107,12 +109,14 @@ if __name__ == "__main__":
     # dic_list = get_dic_url()
     # print(dic_list)
 
-    dic_list = ['caohejing','hongkou', 'putuo', 'yangpu', 'changning', 'songjiang', 'jiading', 'huangpu', 'jingan', 'zhabei', 'hongkou', 'qingpu', 'fengxian', 'jinshan', 'chongming', 'shanghaizhoubian', 'beicai', 'biyun', 'caolu', 'chuansha', 'datuanzhen', 'geqing', 'gaohang', 'gaodong', 'huamu', 'hangtou', 'huinan', 'jinqiao', 'jinyang', 'kangqiao', 'lujiazui', 'laogangzhen', 'lingangxincheng', 'lianyang', 'nichengzhen', 'nanmatou', 'sanlin', 'shibo', 'shuyuanzhen', 'tangqiao', 'tangzhen', 'waigaoqiao', 'wanxiangzhen', 'weifang', 'xuanqiao', 'xinchang', 'yuqiao1', 'yangdong', 'yuanshen', 'yangjing', 'zhangjiang', 'zhuqiao', 'zhoupu', 'chunshen', 'gumei', 'hanghua', 'huacao', 'jinhui', 'jinganxincheng', 'jinhongqiao', 'longbai', 'laominhang', 'maqiao', 'meilong', 'pujiang1', 'qibao', 'shenzhuang', 'wujing', 'zhuanqiao', 'dahua', 'dachangzhen', 'gongfu', 'gongkang', 'gucun', 'gaojing', 'jiangwanzhen', 'luojing', 'luodian', 'songbao', 'songnan', 'shangda', 'tonghe', 'yuepu', 'yanghang', 'zhangmiao']
+    dic_list = ['laogangzhen','hongkou', 'putuo', 'yangpu', 'changning', 'songjiang', 'jiading', 'huangpu', 'jingan', 'zhabei', 'hongkou', 'qingpu', 'fengxian', 'jinshan', 'chongming', 'shanghaizhoubian', 'beicai', 'biyun', 'caolu', 'chuansha', 'datuanzhen', 'geqing', 'gaohang', 'gaodong', 'huamu', 'hangtou', 'huinan', 'jinqiao', 'jinyang', 'kangqiao', 'lujiazui', 'laogangzhen', 'lingangxincheng', 'lianyang', 'nichengzhen', 'nanmatou', 'sanlin', 'shibo', 'shuyuanzhen', 'tangqiao', 'tangzhen', 'waigaoqiao', 'wanxiangzhen', 'weifang', 'xuanqiao', 'xinchang', 'yuqiao1', 'yangdong', 'yuanshen', 'yangjing', 'zhangjiang', 'zhuqiao', 'zhoupu', 'chunshen', 'gumei', 'hanghua', 'huacao', 'jinhui', 'jinganxincheng', 'jinhongqiao', 'longbai', 'laominhang', 'maqiao', 'meilong', 'pujiang1', 'qibao', 'shenzhuang', 'wujing', 'zhuanqiao', 'dahua', 'dachangzhen', 'gongfu', 'gongkang', 'gucun', 'gaojing', 'jiangwanzhen', 'luojing', 'luodian', 'songbao', 'songnan', 'shangda', 'tonghe', 'yuepu', 'yanghang', 'zhangmiao']
 
+    url_list = list()
     for dic in dic_list:
         url_adds = get_urls(dic)
-        for url_add in url_adds:
-            print(url_add)
-            a = input("debug")
-
-    print(url_list)
+        print("%s有%d套房源"%(dic, len(url_adds)))
+        # a = input("DEBUG")
+        url_list+=url_adds
+    with open("/data/yujian/spider_lianjia/output/urls.req","w") as f_url:
+        url_list = ["%s\n"%url for url in url_list]
+        f.writelines(url_list) 
