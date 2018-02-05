@@ -64,11 +64,13 @@ class ProxiesRequests(ProxiesHeaders):
 
     def _proxy_content_singal_(self, url):
         '''发起单个的代理请求 可被继承'''
+        print("SSSSSSSSS",url)
         while True:
             try:
             # URL 请求发送
-                req = requests.get(url, headers=self._headers, proxies=self._proxy, allow_redirects=False, timeout=2)
+                req = requests.get(url, headers=self._headers, proxies=self._proxy, allow_redirects=False, timeout=2, verify=False)
                 req_content = req.content
+                print("$$$$$$$$$",req_content)
                 if str(req_content).find("Concurrent number exceeds limit") != -1:
                     # 端口转发太频繁 重新发起请求
                     continue
@@ -89,6 +91,7 @@ class ProxiesRequests(ProxiesHeaders):
     @property
     def req_content_list(self):
         self._batch_request_
+        print("&&&&&", self._urls)
         return self._content
 
     def add_headers(self, headers):

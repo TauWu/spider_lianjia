@@ -25,3 +25,45 @@ class CheatRequests(ProxiesRequests):
         '''运行第一个url列表 一般用作测试或者只有一个URL列表的情况'''
         self._urls = self.urlss[0]
         return self.req_content_list
+
+    @property
+    def get_cheat_all_content(self):
+        '''运行所有的URL列表 *本请求为迭代请求，请注意网络IO压力*'''
+        for urls in self.urlss:
+            self._urls = urls
+            print("***",self._urls)
+            yield self.req_content_list
+            # 释放内存占用
+            self._content = list()
+
+    def get_cheat_all_content_process_base(self, urlss):
+        ''' 多线程运行所有URL列表 *本请求为全量请求，请注意网络IO和内存压力*'''
+        '''ATTENTION: 这里的urlss已经被get_cheat_all_content_process篡改，因此本函数只能被get_cheat_all_content_process调用'''
+        self._urls = urlss
+        print(self.req_content_list)
+        return   
+
+    @property
+    def get_cheat_all_content_process(self):
+        '''多进程运行所有的URL列表 *本请求为迭代请求，请注意网络IO压力*'''
+        from multiprocessing import Process, cpu_count
+        from itertools import chain
+
+        len_urlss = len(self.urlss)
+        raw_urlss = self.urlss
+
+        cpu_count = cpu_count()
+        print("本机CPU核心数量为: %d"%cpu_count)
+        
+        # 将所有的任务拆分成CPU核心数量相同的份数
+        urls_list = []
+        length_urls_list = len_urlss / cpu_count + 1 # 每份任务的任务长度
+
+        for i in range(0, cpu_count - 1):
+            if i == cpu_count - 2:
+                self.urlss = raw_urlss[int(i*length_urls_list):]
+            else:
+                self.urlss = raw_urlss[int(i*length_urls_list):int((i+1)*length_urls_list)]
+            self.urlss = list(chain(*self.urlss))
+            p = Process(target=self.get_cheat_all_content_process_base, args=(self.urlss,))
+            p.start()

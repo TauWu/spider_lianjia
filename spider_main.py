@@ -91,5 +91,9 @@ if __name__ == "__main__":
         
         elif operation == "test":
         # python3 spider_main.py test
-            req = CheatRequests([["http://2017.ip138.com/ic.asp"]])
-            print(req.get_cheat_first_content[0].decode("gb2312"))
+            req = CheatRequests([["http://2017.ip138.com/ic.asp","http://2017.ip138.com/ic.asp"],["http://2017.ip138.com/ic.asp","http://2017.ip138.com/ic.asp"],["http://2017.ip138.com/ic.asp","http://2017.ip138.com/ic.asp"],["http://2017.ip138.com/ic.asp","http://2017.ip138.com/ic.asp"],["http://2017.ip138.com/ic.asp","http://2017.ip138.com/ic.asp"],["http://2017.ip138.com/ic.asp","http://2017.ip138.com/ic.asp"],["http://2017.ip138.com/ic.asp","http://2017.ip138.com/ic.asp"],["http://2017.ip138.com/ic.asp","http://2017.ip138.com/ic.asp"],["http://2017.ip138.com/ic.asp","http://2017.ip138.com/ic.asp"],["http://2017.ip138.com/ic.asp","http://2017.ip138.com/ic.asp"],["http://2017.ip138.com/ic.asp","http://2017.ip138.com/ic.asp"],["http://2017.ip138.com/ic.asp","http://2017.ip138.com/ic.asp"],["http://2017.ip138.com/ic.asp","http://2017.ip138.com/ic.asp"],["http://2017.ip138.com/ic.asp","http://2017.ip138.com/ic.asp"],["http://2017.ip138.com/ic.asp","http://2017.ip138.com/ic.asp"]])
+            # req = CheatRequests([["https://sh.lianjia.com/zufang/"]])
+            # for content in req.get_cheat_all_content:
+            #     print(content)
+            #     time.sleep(5)
+            req.get_cheat_all_content_process
