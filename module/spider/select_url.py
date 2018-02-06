@@ -26,26 +26,62 @@ def get_pages(busi_area):
     
     return page_amount
 
-def get_urls_page(page_text):
-    '''获取筛选页面的所有房间URL'''
-    url_template = "https://sh.lianjia.com/zufang/{url}.html"
+def get_select_house_infos(page_text):
+    '''获取筛选页面所有的 房间ID等信息'''
+    get_data_compile = re.compile(r"([\u4e00-\u9fa50-9]+)")
+    get_data_with_dot_compile = re.compile(r"([\u4e00-\u9fa50-9\.]+)")
+
     bs4 = BeautifulSoup(page_text, "lxml")
-    urls = list()
+    select_house_infos = list()
+    
     room_list = bs4.findChild("div",{"class":"main-box clear"}).findChild("div",{"class":"con-box"}).findChild("div",{"class":"list-wrap"}).findChild("ul",{"class","house-lst"}).findChildren("li")
+    
     if len(re.findall("list-no-data",str(room_list))) != 0:
         return urls
     for room_info in room_list:
-        url_info = room_info.findChild("div",{"class","info-panel"}).findChild("h2").findChild("a",{"target":"_blank"})
-        url = re.findall(""".+href=\"https://sh.lianjia.com/zufang/(.+).html\"""",str(url_info))[0]
-        urls.append(url_template.format(url=url))
-    return urls
+        # 初始化列表中的房间信息
+        select_house_info = []
+
+        # 房源ID + 房源标题
+        house_title_soup = room_info.findChild("div",{"class","info-panel"}).findChild("h2").findChild("a",{"target":"_blank"})
+        house_title = list(re.findall(""".+href=\"https://sh.lianjia.com/zufang/(.+).html\"[\s\S]*title=\"(.+)\"""",str(house_title_soup))[0])
+
+        # 第一行数据 商圈ID + 商圈名称 + 户型 + 面积 + 朝向
+        where_soup = room_info.findChild("div",{"class":"col-1"}).findChild("div",{"class":"where"})
+        where = re.findall(get_data_compile, str(where_soup))
+
+        # 第二行数据 行政区 + 楼层高低 + 楼层总数 + 建成时间
+        other_soup = room_info.findChild("div",{"class":"col-1"}).findChild("div",{"class":"other"})
+        other = re.findall(get_data_compile, str(other_soup))
+
+        # 第三行数据 房源特色（list）
+        extra_soup = room_info.findChild("div",{"class":"col-1"}).findChild("div",{"class":"view-label left"})
+        extra = re.findall(get_data_with_dot_compile, str(extra_soup))
+
+        # 带看人数
+        square_soup = room_info.findChild("div",{"class":"col-2"}).findChild("span",{"class":"num"})
+        square = re.findall(get_data_compile, str(square_soup))
+
+        # 价格 + 创建时间
+        price_soup = room_info.findChild("div", {"class":"col-3"}).findChild("span",{"class":"num"})
+        price = re.findall(get_data_compile, str(price_soup))
+        create_soup = room_info.findChild("div", {"class":"col-3"}).findChild("div",{"class":"price-pre"})
+        create = re.findall(get_data_with_dot_compile, str(create_soup))
+
+        # 拼接好的列表中的房源信息
+        select_house_info = house_title + where + other + square + price + [create[0]] + [extra]
+        select_house_infos.append(select_house_info)
+
+    return select_house_infos
 
 def get_urls(busi_area):
     '''获取某一商圈内的所有房源URL'''
     page_amount = get_pages(busi_area)
     raw_select_url = "https://sh.lianjia.com/zufang/{busi_area}/pg{page}/"
     select_url_list = list()
-    urls = list()
+    select_house_infoss = list()
+
+    # 生成筛选商圈的URL列表
     for i in range(1,page_amount+1):
         select_url_list.append(raw_select_url.format(busi_area=busi_area, page=i))
  
@@ -55,10 +91,11 @@ def get_urls(busi_area):
 
     for page_texts in contents:
         for page_text in page_texts:
-            url_add = get_urls_page(str(page_text))
-            print("本页房源数量：", len(url_add))
-            urls+=url_add
-    return urls
+            select_house_infos = get_select_house_infos(str(page_text.decode("utf-8")))
+            print("本页房源数量：", len(select_house_infos))
+            select_house_infoss+=select_house_infos
+
+    return select_house_infoss
 
 def get_dic_url():
     '''获取上海目录下小于100页的商圈拼音（用于拼接URL）'''
@@ -93,8 +130,10 @@ def write_urls(url_list):
         url_list = ["%s\n"%url for url in url_list]
         f_url.writelines(url_list) 
 
+# 写URL到文件
 def create_urls(dic_list):
     for dic in dic_list:
+        # 分步写入到数据库中
         url_adds = get_urls(dic)
         print("%s有%d套房源"%(dic, len(url_adds)))
         write_urls(url_adds)

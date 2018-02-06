@@ -1,22 +1,20 @@
-
-CREATE TABLE `lianjia_house_info_json` (
-  `house_id` varchar(30) NOT NULL COMMENT '房源编号',
-  `house_info` varchar(1023) DEFAULT NULL COMMENT '房源信息',
+CREATE TABLE `lianjia_house_info` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+  `house_id` varchar(15) NOT NULL COMMENT '房源编号',
+  `house_title` varchar(63) NOT NULL COMMENT '房源标题' DEFAULT '',
+  `community_id` varchar(15) NOT NULL COMMENT '地标ID' DEFAULT '',
+  `community_name` varchar(31) NOT NULL COMMENT '地标名称' DEFAULT '',
+  `house_type` varchar(8) NOT NULL COMMENT '房型' DEFAULT '',
+  `house_area` varchar(8) NOT NULL COMMENT '面积大小' DEFAULT '',
+  `orientation` varchar(8) NOT NULL COMMENT '朝向' DEFAULT '',
+  `distinct_name` varchar(31) NOT NULL COMMENT '行政区名称' DEFAULT '',
+  `house_floor` varchar(8) NOT NULL COMMENT '房间楼层' DEFAULT '',
+  `house_create_year` varchar(31) NOT NULL COMMENT '建房时间' DEFAULT '',
+  `see_count` int(4) NOT NULL COMMENT '带看人数' DEFAULT 0,
+  `house_price` int(6) NOT NULL COMMENT '房间价格' DEFAULT 0,
+  `sale_date` timestamp NOT NULL COMMENT '上架时间',
+  `extra_info_select` varchar(511) NOT NULL COMMENT '房间标签' DEFAULT '',
   `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最近修改时间',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  PRIMARY KEY (`house_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE `proxies_pool` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '自增ID',
-  `ip` varchar(20) NOT NULL COMMENT 'IP',
-  `port` varchar(8) NOT NULL COMMENT '端口号',
-  `type` varchar(8) NOT NULL COMMENT '代理类型',
-  `extra` varchar(256) DEFAULT NULL COMMENT '附加信息',
-  `failed` int(11) NOT NULL DEFAULT '0' COMMENT '失败次数（删除失败超过五次的代理）',
-  `deleted` int(11) NOT NULL DEFAULT '0' COMMENT '删除标记',
-  `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最近修改时间',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  UNIQUE KEY (`ip`,`port`,`type`),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
