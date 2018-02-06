@@ -19,6 +19,7 @@ class CheatRequests(ProxiesRequests):
         #TODO 这里可能要添加一下Cookie
         ProxiesRequests.__init__(self)
         self.add_headers(random_headers())
+        self.content_list = []
 
     @property
     def get_cheat_first_content(self):
@@ -31,7 +32,7 @@ class CheatRequests(ProxiesRequests):
         '''运行所有的URL列表 *本请求为迭代请求，请注意网络IO压力*'''
         for urls in self.urlss:
             self._urls = urls
-            print("***",self._urls)
+            print("即将请求%d条URL"%len(self._urls))
             yield self.req_content_list
             # 释放内存占用
             self._content = list()
@@ -39,9 +40,12 @@ class CheatRequests(ProxiesRequests):
     def get_cheat_all_content_process_base(self, urlss):
         ''' 多线程运行所有URL列表 *本请求为全量请求，请注意网络IO和内存压力*'''
         '''ATTENTION: 这里的urlss已经被get_cheat_all_content_process篡改，因此本函数只能被get_cheat_all_content_process调用'''
+        import re
         self._urls = urlss
-        print(self.req_content_list)
-        return   
+        self.content_list += self.req_content_list
+        for content in self.content_list:
+            print("########",re.findall("来自(.+)", str(content.decode('gb2312'))))
+        return
 
     @property
     def get_cheat_all_content_process(self):

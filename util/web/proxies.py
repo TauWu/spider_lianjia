@@ -64,6 +64,12 @@ class ProxiesRequests(ProxiesHeaders):
 
     def _proxy_content_singal_(self, url):
         '''发起单个的代理请求 可被继承'''
+
+        # 去除代理不安全的警告 - InsecureRequestWarning
+        import requests
+        from requests.packages.urllib3.exceptions import InsecureRequestWarning 
+        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
         while True:
             try:
             # URL 请求发送
@@ -72,11 +78,13 @@ class ProxiesRequests(ProxiesHeaders):
 
                 if str(req_content).find("Concurrent number exceeds limit") != -1:
                     # 端口转发太频繁 重新发起请求
+                    time.sleep(0.5)
                     continue
                 self._single_content = req_content
                 break
             except Exception as e:
                 print("请求失败！正在重新发起...", e)
+                time.sleep(0.5)
                 continue
 
     @property
@@ -145,3 +153,6 @@ class ProxiesVaild(ProxiesRequests):
         for ip_info in self._vaild_proxies_b_base:
             self.ip_infos.append(ip_info)
         return self.ip_infos
+
+    def clear_ip_info(self):
+        self.ip_infos = []

@@ -41,7 +41,7 @@ headers = {
 def getHouseInfo(url):
     
     # 房源编号
-    house_id_compile = re.compile("http://sh.lianjia.com/zufang/(.+).html")
+    house_id_compile = re.compile("https://sh.lianjia.com/zufang/(.+).html")
     house_id = re.findall(house_id_compile, url)[0]
     
     # 房源来源 默认值0

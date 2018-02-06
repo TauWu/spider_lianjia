@@ -8,16 +8,16 @@ sys.path.append("..")
 
 import requests
 from bs4 import BeautifulSoup
-from spider_page import headers
+from .spider_page import headers
 import re
 import random, time
 
-from cheat.random_proxies import CheatRequests
+from ..cheat.random_proxies import CheatRequests
 
 raw_url = "https://sh.lianjia.com/zufang/{busi_area}/"
 
-# 获取该区域/商圈下拥有的房间页数
 def get_pages(busi_area):
+    '''获取该区域/商圈下拥有的房间页数'''
     raw_text = requests.get(raw_url.format(busi_area=busi_area),headers=headers).text
     bs4 = BeautifulSoup(raw_text,"lxml")
 
@@ -26,8 +26,8 @@ def get_pages(busi_area):
     
     return page_amount
 
-# 获取筛选页面的所有房间URL
 def get_urls_page(page_text):
+    '''获取筛选页面的所有房间URL'''
     url_template = "https://sh.lianjia.com/zufang/{url}.html"
     bs4 = BeautifulSoup(page_text, "lxml")
     urls = list()
@@ -40,8 +40,8 @@ def get_urls_page(page_text):
         urls.append(url_template.format(url=url))
     return urls
 
-# 获取所有的URL
 def get_urls(busi_area):
+    '''获取某一商圈内的所有房源URL'''
     page_amount = get_pages(busi_area)
     raw_select_url = "https://sh.lianjia.com/zufang/{busi_area}/pg{page}/"
     select_url_list = list()
@@ -60,9 +60,8 @@ def get_urls(busi_area):
             urls+=url_add
     return urls
 
-
-# 获取上海目录下小于100页的URL段
 def get_dic_url():
+    '''获取上海目录下小于100页的商圈拼音（用于拼接URL）'''
     req_url = raw_url.format(busi_area="")
     req = CheatRequests([[req_url]])
     content = req.get_cheat_first_content[0].decode("utf-8")
@@ -89,34 +88,21 @@ def get_dic_url():
     return dic_list_result
 
 # 将迭代器中获取到的需要爬取的URL信息写入到文件中
-def wirte_urls(url_add):
-    with open("./output/urls.req","a+") as url:
-        url.writelines(url_add)
+def write_urls(url_list):
+    with open("/data/code/yujian/spider_lianjia/output/urls.req","a+") as f_url:
+        url_list = ["%s\n"%url for url in url_list]
+        f_url.writelines(url_list) 
 
-# 将大批量的数据分批存入文件可能更可靠（？）
-def create_urls(busi_area):
-    for busi in busi_area:
-        url_add = get_urls(busi)
-        while True:
-            try:
-                wirte_urls(next(url_add))
-            except StopIteration:
-                print("迭代结束")
-                break
-
-if __name__ == "__main__":
-    # 获取商圈列表 由于一般情况下不会有变化，故设为常量
-    # dic_list = get_dic_url()
-    # print(dic_list)
-
-    dic_list = ['laogangzhen','hongkou', 'putuo', 'yangpu', 'changning', 'songjiang', 'jiading', 'huangpu', 'jingan', 'zhabei', 'hongkou', 'qingpu', 'fengxian', 'jinshan', 'chongming', 'shanghaizhoubian', 'beicai', 'biyun', 'caolu', 'chuansha', 'datuanzhen', 'geqing', 'gaohang', 'gaodong', 'huamu', 'hangtou', 'huinan', 'jinqiao', 'jinyang', 'kangqiao', 'lujiazui', 'laogangzhen', 'lingangxincheng', 'lianyang', 'nichengzhen', 'nanmatou', 'sanlin', 'shibo', 'shuyuanzhen', 'tangqiao', 'tangzhen', 'waigaoqiao', 'wanxiangzhen', 'weifang', 'xuanqiao', 'xinchang', 'yuqiao1', 'yangdong', 'yuanshen', 'yangjing', 'zhangjiang', 'zhuqiao', 'zhoupu', 'chunshen', 'gumei', 'hanghua', 'huacao', 'jinhui', 'jinganxincheng', 'jinhongqiao', 'longbai', 'laominhang', 'maqiao', 'meilong', 'pujiang1', 'qibao', 'shenzhuang', 'wujing', 'zhuanqiao', 'dahua', 'dachangzhen', 'gongfu', 'gongkang', 'gucun', 'gaojing', 'jiangwanzhen', 'luojing', 'luodian', 'songbao', 'songnan', 'shangda', 'tonghe', 'yuepu', 'yanghang', 'zhangmiao']
-
-    url_list = list()
+def create_urls(dic_list):
     for dic in dic_list:
         url_adds = get_urls(dic)
         print("%s有%d套房源"%(dic, len(url_adds)))
-        # a = input("DEBUG")
-        url_list+=url_adds
-    with open("/data/yujian/spider_lianjia/output/urls.req","w") as f_url:
-        url_list = ["%s\n"%url for url in url_list]
-        f.writelines(url_list) 
+        write_urls(url_adds)
+
+dic_list_all = ['xuhui', 'hongkou', 'putuo', 'yangpu', 'changning', 'songjiang', 'jiading', 'huangpu', 'jingan', 'zhabei', 'hongkou', 'qingpu', 'fengxian', 'jinshan', 'chongming', 'shanghaizhoubian', 'beicai', 'biyun', 'caolu', 'chuansha', 'datuanzhen', 'geqing', 'gaohang', 'gaodong', 'huamu', 'hangtou', 'huinan', 'jinqiao', 'jinyang', 'kangqiao', 'lujiazui', 'laogangzhen', 'lingangxincheng', 'lianyang', 'nichengzhen', 'nanmatou', 'sanlin', 'shibo', 'shuyuanzhen', 'tangqiao', 'tangzhen', 'waigaoqiao', 'wanxiangzhen', 'weifang', 'xuanqiao', 'xinchang', 'yuqiao1', 'yangdong', 'yuanshen', 'yangjing', 'zhangjiang', 'zhuqiao', 'zhoupu', 'chunshen', 'gumei', 'hanghua', 'huacao', 'jinhui', 'jinganxincheng', 'jinhongqiao', 'longbai', 'laominhang', 'maqiao', 'meilong', 'pujiang1', 'qibao', 'shenzhuang', 'wujing', 'zhuanqiao', 'dahua', 'dachangzhen', 'gongfu', 'gongkang', 'gucun', 'gaojing', 'jiangwanzhen', 'luojing', 'luodian', 'songbao', 'songnan', 'shangda', 'tonghe', 'yuepu', 'yanghang', 'zhangmiao'] 
+
+if __name__ == "__main__":
+    pass
+    # 获取商圈列表 由于一般情况下不会有变化，故设为常量
+    # dic_list = get_dic_url()
+    # print(dic_list)
