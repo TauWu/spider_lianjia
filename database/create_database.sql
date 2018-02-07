@@ -12,7 +12,7 @@ CREATE TABLE `lianjia_house_info` (
   `house_create_year` varchar(31) NOT NULL COMMENT '建房时间' DEFAULT '',
   `see_count` int(4) NOT NULL COMMENT '带看人数' DEFAULT 0,
   `house_price` int(6) NOT NULL COMMENT '房间价格' DEFAULT 0,
-  `sale_date` timestamp NOT NULL COMMENT '上架时间',
+  `sale_date` varchar(15) NOT NULL COMMENT '上架时间' DEFAULT '1999-12-31',
   `extra_info_select` varchar(511) NOT NULL COMMENT '房间标签' DEFAULT '',
   `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最近修改时间',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

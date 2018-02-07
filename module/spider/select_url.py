@@ -30,6 +30,7 @@ def get_select_house_infos(page_text):
     '''获取筛选页面所有的 房间ID等信息'''
     get_data_compile = re.compile(r"([\u4e00-\u9fa50-9]+)")
     get_data_with_dot_compile = re.compile(r"([\u4e00-\u9fa50-9\.]+)")
+    get_data_with_bracket_compile = re.compile(r"([\u4e00-\u9fa50-9\(\) )]+)")
 
     bs4 = BeautifulSoup(page_text, "lxml")
     select_house_infos = list()
@@ -37,7 +38,7 @@ def get_select_house_infos(page_text):
     room_list = bs4.findChild("div",{"class":"main-box clear"}).findChild("div",{"class":"con-box"}).findChild("div",{"class":"list-wrap"}).findChild("ul",{"class","house-lst"}).findChildren("li")
     
     if len(re.findall("list-no-data",str(room_list))) != 0:
-        return urls
+        return select_house_infos
     for room_info in room_list:
         # 初始化列表中的房间信息
         select_house_info = []
@@ -48,11 +49,37 @@ def get_select_house_infos(page_text):
 
         # 第一行数据 商圈ID + 商圈名称 + 户型 + 面积 + 朝向
         where_soup = room_info.findChild("div",{"class":"col-1"}).findChild("div",{"class":"where"})
-        where = re.findall(get_data_compile, str(where_soup))
+        # 获取商圈名称
+        community_name_soup = where_soup.findChild("a").findChild("span", {"class":"region"})
+        community_name_compile = re.compile("<span class=\"region\">(.+)</span>")
+        community_name = re.findall(community_name_compile, str(community_name_soup))[0]
+
+        # 获取where下的所有可利用资源
+        where = re.findall(get_data_with_bracket_compile, str(where_soup))
+        where = list(where)
+        # 过滤单个的空格
+        while True:
+            try:
+                where.remove(" ")
+            except Exception:
+                break
+        # 拼接第一行数据
+        where_list = []
+        where_list.append(where[0])
+        where_list.append(community_name)
+        where_list += where[-3:]
+
+        where = tuple(where_list)
 
         # 第二行数据 行政区 + 楼层高低 + 楼层总数 + 建成时间
         other_soup = room_info.findChild("div",{"class":"col-1"}).findChild("div",{"class":"other"})
         other = re.findall(get_data_compile, str(other_soup))
+        # 针对长风租房的防御
+        if len(other) == 5:
+            other = other[1:]
+        # 针对没有建成时间的防御
+        if len(other) == 3:
+            other.append("")
 
         # 第三行数据 房源特色（list）
         extra_soup = room_info.findChild("div",{"class":"col-1"}).findChild("div",{"class":"view-label left"})
@@ -69,13 +96,13 @@ def get_select_house_infos(page_text):
         create = re.findall(get_data_with_dot_compile, str(create_soup))
 
         # 拼接好的列表中的房源信息
-        select_house_info = house_title + where + other + square + price + [create[0]] + [extra]
+        select_house_info = house_title + where + other + square + price + [create[0].replace(".","-")] + [";".join(extra)]
         select_house_infos.append(select_house_info)
 
     return select_house_infos
 
-def get_urls(busi_area):
-    '''获取某一商圈内的所有房源URL'''
+def get_select_house_infoss(busi_area):
+    '''获取某一商圈内的所有房源的基础信息（从筛选页面中获取）'''
     page_amount = get_pages(busi_area)
     raw_select_url = "https://sh.lianjia.com/zufang/{busi_area}/pg{page}/"
     select_url_list = list()
@@ -124,19 +151,32 @@ def get_dic_url():
     dic_list_result += busi_list_result
     return dic_list_result
 
-# 将迭代器中获取到的需要爬取的URL信息写入到文件中
-def write_urls(url_list):
-    with open("/data/code/yujian/spider_lianjia/output/urls.req","a+") as f_url:
-        url_list = ["%s\n"%url for url in url_list]
-        f_url.writelines(url_list) 
+# 将迭代器中获取到的房源基础信息写入到select_house_info.req文件中去
+def write_select_house_info(select_house_infos):
+    with open("/data/code/yujian/spider_lianjia/output/select_house_info.req","a+") as f_info:
+        select_house_infos = ["%s\n"%select_house_info for select_house_info in select_house_infos]
+        f_info.writelines(select_house_infos) 
 
-# 写URL到文件
-def create_urls(dic_list):
+# 将筛选页面中的房源基础信息写入到select_house_info.req文件中去
+def create_select_house_info_file(dic_list):
     for dic in dic_list:
-        # 分步写入到数据库中
-        url_adds = get_urls(dic)
-        print("%s有%d套房源"%(dic, len(url_adds)))
-        write_urls(url_adds)
+        select_house_infos = get_select_house_infoss(dic)
+        print("%s有%d套房源"%(dic, len(select_house_infos)))
+        write_select_house_info(select_house_infos)
+
+# 将筛选页面中的房源基础信息写入到数据库中
+def create_select_house_info_db(dic_list):
+    sys.path.append("../..")
+    from util.database import LJDBController
+
+    lj_db = LJDBController()
+
+    for dic in dic_list:
+        select_house_infos = get_select_house_infoss(dic)
+        print("%s有%d套房源"%(dic, len(select_house_infos)))
+        lj_db.insert_house(select_house_infos)
+    
+    lj_db.close
 
 dic_list_all = ['xuhui', 'hongkou', 'putuo', 'yangpu', 'changning', 'songjiang', 'jiading', 'huangpu', 'jingan', 'zhabei', 'hongkou', 'qingpu', 'fengxian', 'jinshan', 'chongming', 'shanghaizhoubian', 'beicai', 'biyun', 'caolu', 'chuansha', 'datuanzhen', 'geqing', 'gaohang', 'gaodong', 'huamu', 'hangtou', 'huinan', 'jinqiao', 'jinyang', 'kangqiao', 'lujiazui', 'laogangzhen', 'lingangxincheng', 'lianyang', 'nichengzhen', 'nanmatou', 'sanlin', 'shibo', 'shuyuanzhen', 'tangqiao', 'tangzhen', 'waigaoqiao', 'wanxiangzhen', 'weifang', 'xuanqiao', 'xinchang', 'yuqiao1', 'yangdong', 'yuanshen', 'yangjing', 'zhangjiang', 'zhuqiao', 'zhoupu', 'chunshen', 'gumei', 'hanghua', 'huacao', 'jinhui', 'jinganxincheng', 'jinhongqiao', 'longbai', 'laominhang', 'maqiao', 'meilong', 'pujiang1', 'qibao', 'shenzhuang', 'wujing', 'zhuanqiao', 'dahua', 'dachangzhen', 'gongfu', 'gongkang', 'gucun', 'gaojing', 'jiangwanzhen', 'luojing', 'luodian', 'songbao', 'songnan', 'shangda', 'tonghe', 'yuepu', 'yanghang', 'zhangmiao'] 
 

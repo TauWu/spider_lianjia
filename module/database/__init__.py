@@ -33,11 +33,11 @@ class DBController():
 
         try:
             from .config import database_info
-            host=database_info[host]
-            port=database_info[port]
-            user=database_info[user]
-            passwd=database_info[passwd]
-            db=database_info[db]
+            host=database_info["host"]
+            port=database_info["port"]
+            user=database_info["user"]
+            passwd=database_info["passwd"]
+            db=database_info["db"]
         except ImportError:
             print("没有找到数据库配置文件，将以默认方法创建连接")
 

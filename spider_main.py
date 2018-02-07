@@ -4,28 +4,26 @@ import time
 import sys
 import csv
 
-from module.spider.select_url import create_urls, dic_list_all, get_dic_url, get_pages
+from module.spider.select_url import create_select_house_info_file, create_select_house_info_db, dic_list_all, get_dic_url, get_pages
 from module.spider.spider_page import getHouseInfo
-
-from util.database.insert import insert_lianjia_house_json
 
 def create_task(busi_area):
     '''创建任务 - 通过商圈名称确定下一步需要爬取的房源详情链接列表'''
     busi_area_out = busi_area[:]
 
     # 遍历检查传入的商圈的页面是否超过100页 - 链家当前对100页以后的商圈有反爬虫处理
-    for busi_area_single in busi_area:
-        if get_pages(busi_area_single) > 100:
-            a = input("商圈[%s]的页码数大于100，是否继续运行？[Y/N]"%busi_area_single)
-            if a.strip() == "Y":
-                busi_area_out.remove(busi_area_single)
-            else:
-                raise ValueError("商圈[%s]页数超量，请检查后重新执行！"%busi_area_single)
+    # for busi_area_single in busi_area:
+    #     if get_pages(busi_area_single) > 100:
+    #         a = input("商圈[%s]的页码数大于100，是否删除本商圈后继续运行？[Y/N]"%busi_area_single)
+    #         if a.strip() == "Y":
+    #             busi_area_out.remove(busi_area_single)
+    #         else:
+    #             raise ValueError("商圈[%s]页数超量，请检查后重新执行！"%busi_area_single)
 
-    if len(busi_area_out) == 0:
-        raise ValueError("待爬取商圈数量为0 程序结束")
+    # if len(busi_area_out) == 0:
+    #     raise ValueError("待爬取商圈数量为0 程序结束")
 
-    create_urls(busi_area_out)
+    create_select_house_info_db(busi_area_out)
 
 def create_task_csv(csv_file):
     '''通过csv文件创建任务 - csv_file为商圈列表csv文件'''
@@ -93,7 +91,7 @@ if __name__ == "__main__":
         # python3 spider_main.py all - 获取所有待爬取的url列表 后 获取房源详情
         elif operation == "all":
             create_task(dic_list_all)
-            do_task()
+            # do_task()
 
         # python3 spider_main.py all1 - 先获取所有商圈 后 获取所有待爬url 后 获取房源详情
         elif operation == "all1":
