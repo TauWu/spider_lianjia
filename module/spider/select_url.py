@@ -69,7 +69,7 @@ def get_select_house_infos(page_text):
         where_list.append(community_name)
         where_list += where[-3:]
 
-        where = tuple(where_list)
+        where = where_list
 
         # 第二行数据 行政区 + 楼层高低 + 楼层总数 + 建成时间
         other_soup = room_info.findChild("div",{"class":"col-1"}).findChild("div",{"class":"other"})

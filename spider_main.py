@@ -5,7 +5,7 @@ import sys
 import csv
 
 from module.spider.select_url import create_select_house_info_file, create_select_house_info_db, dic_list_all, get_dic_url, get_pages
-from module.spider.spider_page import getHouseInfo
+
 
 def create_task(busi_area):
     '''创建任务 - 通过商圈名称确定下一步需要爬取的房源详情链接列表'''

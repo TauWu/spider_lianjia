@@ -1,306 +1,135 @@
 # -*- coding: utf-8 -*-
 # spider_page 页面数据分析
 
-import requests
+import sys
+sys.path.append("..")
+
+from cheat.random_proxies import CheatRequests
+
 from bs4 import BeautifulSoup
 import re
-
-from pprint import pprint
 
 #TODO 后期请求附加参数将从cheat模块中获取
 headers = {
     "User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36"
 }
 
-# 具体房源： 链家整租、自如整租、自如合租
-# "HouseID":房源编号
-# "HouseSource":房源来源 # 1-链家整租 2-自如整租 3-自如合租
-# "HouseStatus"：房源状态 # 1-在售 2-下架
-# "Title": 房间详情页标题
-# "HousePrice":租金
-# "HouseType":户型
-# "HouseArea":房间大小
-# "HouseFloor":房间楼层
-# "HouseOri":房间朝向
-# "AddrRegion":地址行政区
-# "AddrBusi":地址商圈
-# "SellTime":上架时间
-# "CommunityName": 地标名称
-# "CommunityAddr":地标地址
-# "CommunityPosi":地标坐标 - 百度坐标系
-# "SeeCountSevenDay":近七天带看次数 - 链家整租有
-# "SeeCount":带看总数 - 链家整租有
+# 房源特色图片tag枚举表
+house_tag_detail = {
+    "1":"床",
+    "2":"电视",
+    "3":"冰箱",
+    "4":"洗衣机",
+    "5":"空调",
+    "6":"暖气",
+    "7":"宽带",
+    "9":"天然气",
+    "10":"热水器",
+    "11":"衣柜",
+    "12":"桌椅",
+    "13":"微波炉"
+}
 
-# "LianjiaExtra": 链家整租的其他信息
-    # "HouseTypePic":户型图 - 链家整租有
-# "ZiruExtra":自如整租、合租的其他信息
-    # "HouseBasicInfo": 房源基础信息 - 自如合租、自如整租有
-    # "HousePayInfo":房源支付信息 - 自如整租、自如合租有
+def get_house_info(page_text):
+    '''筛选页面中所有需要的消息'''
+    soup = BeautifulSoup(page_text, "lxml")
+    house_info = list()
 
-# 分析链家网中房源信息总入口
-def getHouseInfo(url):
+    # 获取房间编号
+    house_id_soup = soup.findChild("span",{"class":"houseNum"})
+    house_id_compile = "([\dSH]+)"
+    house_id = re.findall(house_id_compile, str(house_id_soup))[0]
+
+    house_info.append(house_id)
+
+
+    # 获取房间户型、发布时间
+    lable_compile = re.compile("<i>(.+)</i>")
+    result_compile = re.compile("</i>(.+)</p>")
+
+    house_type_new = None
+    sale_date_new = None
+    house_type_new_soups = soup.findChildren("p",{"class":"lf"})
+    for house_type_new_soup in house_type_new_soups:
+        lable = re.findall(lable_compile, str(house_type_new_soup))[0]
+        result = re.findall(result_compile, str(house_type_new_soup))[0]
+        if lable.strip() == "房屋户型：":
+            house_type_new = result
+        if lable.strip() == "时间：":
+            sale_date_new = result
     
-    # 房源编号
-    house_id_compile = re.compile("https://sh.lianjia.com/zufang/(.+).html")
-    house_id = re.findall(house_id_compile, url)[0]
-    
-    # 房源来源 默认值0
-    house_source = 0
-    if house_id[3] != "r":
-        # 链家整租
-        house_source = 1
+    house_info.append(house_type_new)
+    house_info.append(sale_date_new)
 
-    # 获取网页基础信息
-    raw_text = requests.get(url, headers=headers).text
-    raw_bs = BeautifulSoup(raw_text, "lxml")
+    # 获取基本属性
+    basic_info_soup = soup.findChild("div",{"class":"introContent"}).findChild("div",{"class":"content"})
+    basic_info_compile = "([^\x00-\xff]+)"
+    basic_info = re.findall(basic_info_compile, str(basic_info_soup))
+    basic_info = ",".join(basic_info)
+    basic_info = basic_info.replace("：,","：")
+    house_info.append(basic_info)
 
-    # 房源详情页标题
-    title_soup = raw_bs.findChild("div",{"class":"zf-top"}).findChild("div",{"class":"title-wrapper"}).findChild("div",{"class":"content"}).findChild("div",{"class":"title"}).findChild("h1",{"class":"main"})
-    title_compile = re.compile("<h1.+title=\"(.+)\".+")
-    title = re.findall(title_compile,str(title_soup))[0]
+    # 获取房源标签
+    house_tag_soups = soup.findChild("div",{"class":"zf-tag"}).findChildren("li")
+    house_tag_list = list()
+    house_tag_compile = "<li class=\"(.+)\">"
+    for house_tag_soup in house_tag_soups:
+        house_tag = re.findall(house_tag_compile, str(house_tag_soup))[0]
+        if house_tag.find("tags") != -1:
+            house_tag = house_tag[3:-5]
+            house_tag_list.append(house_tag_detail[house_tag])
 
-    # 房源简介模块
-    # 房源来源信息
-    cj_cun_soup = raw_bs.findChild("div",{"class":"zf-top"}).findChild("div",{"class":"cj-cun"})
-    content_soup = None
+    house_info.append(",".join(house_tag_list))
 
-    # 上下架信息
-    house_status_soup = cj_cun_soup.findChild("div",{"class":"album-box"}).findChild("div",{"class":"album-box left"}).findChild("div",{"class":"pic-panel pic-panel-hover"}).findChild("div",{"class":"tag tag_yixiajia"})
+    # 获取房源特色
+    house_feature_soup = soup.findChild("div",{"class":"featureContent"})
+    house_feature_compile = "([\u4e00-\u9fa5\d：]+)"
+    house_feature = re.findall(house_feature_compile, str(house_feature_soup))
+    house_feature = ",".join(house_feature)
+    house_feature = house_feature.replace("：,","：")
 
-    house_status = 1
+    house_info.append(house_feature)
 
-    if house_status_soup is None:
-        house_status = 2
+    return house_info
 
-    if house_source == 1:
-        content_soup = cj_cun_soup.findChild("div",{"class":"content forRent"})
+def get_house_infos(house_id_list):
+    '''输入一个列表的house_id，返回所需要的房源信息'''
+    url_template = "https://sh.lianjia.com/zufang/{house_id}.html"
+    url_list = list()
+    house_infos = list()
 
-    else:
-        content_soup = cj_cun_soup.findChild("div",{"class":"content"})
+    # 获取待请求的URL列表
+    for house_id in house_id_list:
+        url_list.append(url_template.format(house_id=house_id))
 
-        house_source_compile = re.compile("[\s\S]*\"houseInfo ziru_(.+)\"[\s\S]*")
-        house_source_str = re.findall(house_source_compile, str(content_soup))[0]
+    req = CheatRequests([url_list])
 
-        if house_source_str == "zhengzu":
-            house_source = 2
-        elif  house_source_str == "hezu":
-            house_source = 3
+    contents = req.get_cheat_all_content
 
-    # 房源户型等信息解析
-    basic_info = None
-    if house_source == 1:
-        house_info_soup = content_soup.findChild("div",{"class":"houseInfo"})
-        around_info_soup = content_soup.findChild("table",{"class":"aroundInfo"}).findChildren("tr")
-        basic_info = getHouseBasicInfoLJZZ(house_info_soup, around_info_soup)
+    for page_texts in contents:
+        for page_text in page_texts:
+            house_info = get_house_info(str(page_text.decode('utf-8')))
+            print("房源【%s】的页面信息爬取完毕"%house_info[0])
+            house_infos.append(house_info)
 
-    elif house_source == 2:
-        house_info_soup = content_soup.findChild("div",{"class":"houseInfo ziru_zhengzu"})
-        around_info_soup = content_soup.findChild("table",{"class":"aroundInfo"}).findChildren("tr")
-        basic_info = getHouseBasicInfoZRZZ(house_info_soup, around_info_soup)
+    return house_infos
 
-    elif house_source == 3:
-        house_info_soup = content_soup.findChild("div",{"class":"houseInfo ziru_hezu"})
-        around_info_soup = content_soup.findChild("table",{"class":"aroundInfo"}).findChildren("tr")
-        basic_info = getHouseBasicInfoZRHZ(house_info_soup, around_info_soup)
+def create_house_info_db(num=10):
+    '''将获取到的房源详情的数据写入到数据库'''
+    sys.path.append("../..")
+    from util.database import LJDBController
 
-    # 房源坐标信息
-    posi_soup = raw_bs.findChild("div",{"class":"around js_content"})
+    lj_db = LJDBController()
+    house_id_list_req = list()
 
-    #TODO 此处正则待验证
-    posi_lng_compile = re.compile("[\s\S]*longitude=\"(([0-9]|\.)+)\"[\s\S]*")
-    posi_lat_compile = re.compile("[\s\S]*latitude=\"(([0-9]|\.)+)\"[\s\S]*")
-
-    house_lng_posi = re.findall(posi_lng_compile, str(posi_soup))[0][0]
-    house_lat_posi = re.findall(posi_lat_compile, str(posi_soup))[0][0]
-
-    house_posi = {
-        "Latitude":house_lat_posi,
-        "Longitude":house_lng_posi
-    }
-
-    # 带看记录信息
-    see_count = None
-    see_count_seven_days = None
-    if house_source == 1:
-        try:
-            see_soup = raw_bs.findChild("div",{"class","record js_content"}).findChild("div",{"class","panel"})
-
-            see_count_seven_days_soup = see_soup.findChild("div", {"class":"count"})
-            see_count_soup = see_soup.findChild("div",{"class","totalCount"}).findChild("span")
-
-            see_count = re.findall("([0-9]+)",str(see_count_soup))[0]
-            see_count_seven_days = re.findall("([0-9]+)",str(see_count_seven_days_soup))[0]
-        
-        except AttributeError:
-            pass
-    
-    # 其他信息获取
-    lianjia_extra = dict()
-    ziru_extra = dict()
-    if house_source != 1:
-        # 获取自如的其他信息
-        introduction_soup = raw_bs.findChild("div",{"id":"introduction"}).findChild("div",{"class":"introduction"}).findChild("div",{"class":"introContent"})
-        # 获取基本属性
-        try:
-            house_basic_info_soup = introduction_soup.findChild("div",{"class":"base baseFull"}).findChild("div",{"class":"content"}).findChild("ul").findChildren("li")
-            house_basic_info_compile = re.compile("([\u4e00-\u9fa5]+)")
-            house_basic_info = [house_basic_info for house_basic_info in re.findall(house_basic_info_compile, str(house_basic_info_soup))][1::2]
-            ziru_extra["HouseBasicInfo"] = ",".join(house_basic_info)
-        except AttributeError:
-            pass
-
-        # 获取房源特色
-        try:
-            house_feature_infos = list()
-            house_feature_info_soup = introduction_soup.findChild("div",{"class":"feature"}).find("div",{"class":"featureContent"}).findChild("ul").findChildren("li")
-            house_feature_info_compile = re.compile("<span class=\"text\">([\s\S]*)</span>")
-            for i in range (0, len(house_feature_info_soup)):
-                house_feature_info = re.findall(house_feature_info_compile, str(house_feature_info_soup[i]))
-                house_feature_infos += house_feature_info
-            ziru_extra["HouseFeatureInfo"] = house_feature_infos
-        except AttributeError:
-            pass
-
-        # 获取支付方式
-        try:
-            payment_list = list()
-            payment_soup = raw_bs.findChild("div",{"class":"payment js_content"}).findChild("div",{"class":"content"}).findChild("table",{"class":"paylist"}).findChildren("tr")
-            payment_compile = re.compile("<tr.+<td>(.+)</td><td>(.+)</td><td>(.+)</td><td>(.+)</td>.+</tr>")
-            for i in range(1, len(payment_soup)):
-                payment = list(re.findall(payment_compile, str(payment_soup[i]).strip().replace('\n',''))[0])
-                payment = {"方式":payment[0],"租金":payment[1],"押金":payment[2],"服务费":payment[3]}
-                payment_list.append(payment)
-            ziru_extra["PaymentList"] = payment_list
-
-        except AttributeError:
-            pass
-
-    else:
-        # 链家其他信息获取
-        try:
-            house_type_pic_soup = raw_bs.findChild("div",{"class":"content-wrapper huxing js_content"}).findChild("div",{"class":"container"}).findChild("div",{"class":"hx_pic"}).findChild("a")
-
-            house_type_pic_compile = re.compile(".+href=\"(.+)\" target=.+")
-            house_type_pic = re.findall(house_type_pic_compile, str(house_type_pic_soup))[0]
-            lianjia_extra["HouseTypePic"] = house_type_pic
-        except AttributeError:
-            pass
-
-    # print(house_id, title, house_source, basic_info, house_posi, see_count, see_count_seven_days, ziru_extra, lianjia_extra)
-
-    return {
-        "HouseID":house_id,
-        "HouseSource":house_source,
-        "HouseStatus":house_status,
-        "Title":title,
-        "HousePrice":basic_info[0],
-        "HouseType":basic_info[1],
-        "HouseArea":basic_info[2],
-        "HouseFloor":basic_info[3],
-        "HouseOri":basic_info[4],
-        "AddrRegion":basic_info[5],
-        "AddrBusi":basic_info[6],
-        "SellTime":basic_info[7],
-        "CommunityName":basic_info[8],
-        "CommunityAddr":basic_info[9],
-        "CommunityPosi":house_posi,
-        "SeeCountSevenDay":see_count_seven_days,
-        "SeeCount":see_count,
-        "ZiruExtra":ziru_extra,
-        "LianjiaExtra":lianjia_extra
-    }
-
-def getHouseBasicInfoLJZZ(house_info_soup, around_info_soup):
-
-    # 租金
-    house_price = re.findall("""<div class="mainInfo bold" style="font-size:28px;">(.+)<span.+</div>""",str(house_info_soup.findChild("div",{"class":"price"}).findChild("div",{"class":"mainInfo bold"})))[0]
-
-    # 房型
-    house_type = re.findall("""<div class="mainInfo">(.+)<span class="unit">室</span>.([0-9])<span class="unit">厅</span></div>""",str(house_info_soup.findChild("div",{"class":"room"}).findChild("div",{"class":"mainInfo"})))[0]
-    house_type = "%s室%s厅"%(house_type[0],house_type[1])
-
-    # 房间面积
-    house_area = re.findall("""<div class="mainInfo">(.+)<span class="unit">平</span></div>""",str(house_info_soup.findChild("div",{"class":"area"}).findChild("div",{"class":"mainInfo"})))
-    house_area = "%s平"%(house_area[0])
-
-    # 解析第一行数据
-    tb1 = around_info_soup[0].findChildren("td",{"width":"50%"})
-    house_floor = re.findall("""<td width="50%">(.+)</td>""", str(tb1[0]))[0]
-    house_ori = str(re.findall("""<td width="50%">([\s\S]*)</td>""", str(tb1[1]))).replace(" ","").replace("\\n","").replace("\\t","")[2:-2]
-
-    # 解析第二行数据
-    tb2 = around_info_soup[1].findChildren("td",{"width":"50%"})
-    house_location = re.findall("""<td width="50%"><a href=".+" target="_blank">(.+)</a> <a href=".+" target="_blank">(.+)</a></td>""", str(tb2))[0]
-    addr_region = house_location[0]
-    addr_busi = house_location[1]
-    sell_time = re.findall("""<td width="50%">(.+)</td>""", str(tb2[1]))
-    if len(sell_time) != 0:
-        sell_time = sell_time[0]
-    else:
-        sell_time = None
-
-    # 解析第三行数据
-    tb3 = around_info_soup[2].findChild("p",{"class","addrEllipsis"})
-    community_name = re.findall("""<p class="addrEllipsis" title="(.+)">[\s\S]*""", str(tb3))[0]
-
-    # 解析第四行数据
-    tb4 = around_info_soup[3].findChild("p",{"class","addrEllipsis"})
-    community_addr = re.findall("""<p class="addrEllipsis" title="(.+)">[\s\S]*""", str(tb4))[0].replace(",","，")
-
-    return house_price, house_type, house_area, house_floor, house_ori, addr_region, addr_busi, sell_time, community_name, community_addr
-
-def getHouseBasicInfoZRZZ(house_info_soup, around_info_soup):
-    return getHouseBasicInfoLJZZ(house_info_soup, around_info_soup)
-
-def getHouseBasicInfoZRHZ(house_info_soup, around_info_soup):
-    # 房间价格
-    house_price = re.findall("""<div class="mainInfo bold" style="font-size:28px;">(.+)<span.+</div>""",str(house_info_soup.findChild("div",{"class":"price"}).findChild("div",{"class":"mainInfo bold"})))[0]
-
-    # 房间面积
-    house_area = re.findall("""<div class="mainInfo">(.+)<span class="unit">平</span></div>""",str(house_info_soup.findChild("div",{"class":"area"}).findChild("div",{"class":"mainInfo"})))
-    house_area = "%s平"%(house_area[0])
-
-    # 解析第一行数据
-    tb1 = around_info_soup[0].findChildren("td",{"width":"50%"})
-    house_type = re.findall("""<td width="50%">(.+)</td>""", str(tb1[0]))[0]
-    house_area =re.findall("""<td width="50%">(.+)</td>""", str(tb1[1]))[0]
-
-    # 解析第二行数据
-    tb2 = around_info_soup[1].findChildren("td",{"width":"50%"})
-    house_floor = re.findall("""<td width="50%">(.+)</td>""", str(tb2[0]))[0]
-    house_ori = str(re.findall("""<td width="50%">([\s\S]*)</td>""", str(tb2[1]))).replace(" ","").replace("\\n","").replace("\\t","")[2:-2]
-
-    # 解析第三行数据
-    tb3 = around_info_soup[2].findChildren("td",{"width":"50%"})
-    house_location = re.findall("""<td width="50%"><a href=".+" target="_blank">(.+)</a> <a href=".+" target="_blank">(.+)</a></td>""", str(tb3))[0]
-    addr_region = house_location[0]
-    addr_busi = house_location[1]
-    sell_time = re.findall("""<td width="50%">(.+)</td>""", str(tb3[1]))
-    sell_time = re.findall("""<td width="50%">(.+)</td>""", str(tb2[1]))
-    if len(sell_time) != 0:
-        sell_time = sell_time[0]
-    else:
-        sell_time = None
-
-    # 解析第三行数据
-    tb4 = around_info_soup[3].findChild("p",{"class","addrEllipsis"})
-    community_name = re.findall("""<p class="addrEllipsis" title="(.+)">[\s\S]*""", str(tb4))[0]
-
-    # 解析第四行数据
-    tb5 = around_info_soup[4].findChild("p",{"class","addrEllipsis"})
-    community_addr = re.findall("""<p class="addrEllipsis" title="(.+)">[\s\S]*""", str(tb5))[0].replace(",","，")
-
-    return house_price, house_type, house_area, house_floor, house_ori, addr_region, addr_busi, sell_time, community_name, community_addr
+    house_id_lists = lj_db.get_house_ids(num=15)
+    for house_id_list in house_id_lists:
+        for house_id in house_id_list:
+            house_id_list_req.append(house_id[0])
+        s = get_house_infos(house_id_list_req)
+        print(s)
+        a = input("DEBUG")
 
 if __name__ == "__main__":
-    urls = [
-        "http://sh.lianjia.com/zufang/shz4277432.html",
-        "http://sh.lianjia.com/zufang/shz4277132.html",
-        "http://sh.lianjia.com/zufang/shzr100000000.html",
-        "http://sh.lianjia.com/zufang/shzr100043293.html",
-        "http://sh.lianjia.com/zufang/shz4301605.html"
-    ]
-
-    for url in urls:
-        pprint(getHouseInfo(url))
-        print("\n")
+    create_house_info_db()
+    # print(get_house_infos(["107100000682","107002262926","107001043986","SH0003283827"]))

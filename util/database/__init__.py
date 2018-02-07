@@ -11,6 +11,16 @@ class LJDBController(DBController):
         # 初始化DBController对象
         DBController.__init__(self)
 
+    @property
+    def _count(self):
+        '''库存数量'''
+        from .sql_template import get_count_sql
+
+        DBController.execute(self, get_count_sql)
+        count = self.cur.fetchone()[0]
+        return count
+
+
     def insert_house(self, house_info_list):
         '''向house_info表中插入多条房源信息'''
         from .sql_template import house_info_insert_sql
@@ -24,6 +34,31 @@ class LJDBController(DBController):
             except Exception as e:
                 print("未知错误！输出house_info待确定【%s】"%house_info[0], house_info, e)
     
+    def get_house_ids(self, num=10):
+        '''向数据库请求num数量的房间ID'''
+        from .sql_template import get_house_id_sql
+        
+        count = self._count
+
+        for t in range(0, int(count/num) + 1):
+            id_list = list()
+            if t != int(count/num):
+                for i in range(1, num + 1):
+                    id_list.append(str(t * num + i))
+            else:
+                for i in range(int(count/num)*num, count+1):
+                    id_list.append(str(i))
+            id_list = ",".join(id_list)
+            DBController.execute(self, get_house_id_sql%(id_list))
+
+            house_id_list = self.cur.fetchall()
+
+            yield (house_id_list)
+
+    def update_house_info(self, house_info_list):
+        pass
+
+
     @property
     def close(self):
         '''关闭数据库连接'''

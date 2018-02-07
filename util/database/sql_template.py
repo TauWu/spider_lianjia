@@ -15,3 +15,31 @@ values
     ("%s", "{insert_date}", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", %s, %s, "%s", "%s")
 """.format(insert_date=str(local_date))
 
+# 获取库存总量SQL
+get_count_sql = """
+select
+    count(1)
+from
+    lianjia_house_info
+"""
+
+
+# 批量请求房源ID的SQL
+get_house_id_sql = """
+select
+    house_id
+from
+    lianjia_house_info
+where
+    id in ( %s )
+"""
+
+# 批量请求房源ID+地标ID的SQL
+get_hc_id_sql = """
+select
+    house_id, community_id
+from
+    lianjia_house_info
+where
+    id in ( %s )
+"""
