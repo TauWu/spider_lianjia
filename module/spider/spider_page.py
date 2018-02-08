@@ -4,7 +4,7 @@
 import sys
 sys.path.append("..")
 
-from cheat.random_proxies import CheatRequests
+from ..cheat.random_proxies import CheatRequests
 
 from bs4 import BeautifulSoup
 import re
@@ -109,7 +109,6 @@ def get_house_infos(house_id_list):
     for page_texts in contents:
         for page_text in page_texts:
             house_info = get_house_info(str(page_text.decode('utf-8')))
-            print("房源【%s】的页面信息爬取完毕"%house_info[0])
             house_infos.append(house_info)
 
     return house_infos
@@ -120,16 +119,15 @@ def create_house_info_db(num=10):
     from util.database import LJDBController
 
     lj_db = LJDBController()
-    house_id_list_req = list()
 
-    house_id_lists = lj_db.get_house_ids(num=15)
+    house_id_lists = lj_db.get_house_ids(num=num)
     for house_id_list in house_id_lists:
+        house_id_list_req = list()
         for house_id in house_id_list:
             house_id_list_req.append(house_id[0])
         s = get_house_infos(house_id_list_req)
-        print(s)
-        a = input("DEBUG")
+        lj_db.update_house_info(s)
 
 if __name__ == "__main__":
-    create_house_info_db()
+    create_house_info_db(num=20)
     # print(get_house_infos(["107100000682","107002262926","107001043986","SH0003283827"]))

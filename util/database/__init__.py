@@ -56,8 +56,16 @@ class LJDBController(DBController):
             yield (house_id_list)
 
     def update_house_info(self, house_info_list):
-        pass
+        '''将房间详情页面的信息'''
+        from .sql_template import update_house_info_sql
 
+        for house_info in house_info_list:
+            try:
+                update_house_info_sql_exec = (update_house_info_sql.format(house_id=house_info[0]))%(tuple(house_info[1:]))
+                DBController.execute(self, update_house_info_sql_exec)
+                print("更新房源【%s】详情成功"%house_info[0])
+            except Exception as e:
+                print("更新页面详情数据错误", e, update_house_info_sql_exec)
 
     @property
     def close(self):

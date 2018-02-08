@@ -5,6 +5,7 @@ import sys
 import csv
 
 from module.spider.select_url import create_select_house_info_file, create_select_house_info_db, dic_list_all, get_dic_url, get_pages
+from module.spider.spider_page import create_house_info_db
 
 
 def create_task(busi_area):
@@ -34,31 +35,8 @@ def create_task_csv(csv_file):
         task = next(tasks)
     create_task(task)
 
-def do_task_csv():
-    '''读取文件内部URL以发起请求'''
-    with open("./output/result.csv","a+") as result:
-        result.write("编号,价格,户型,面积,楼层,朝向,行政区,商圈,上线日期,地标名称,地标地址\n")
-    with open("./output/urls.req","r") as f:
-        urls = f.readlines()
-        if len(urls) != 0:
-            for url in urls:
-                info = getHouseInfo(url[:-1])
-                with open("./output/result.csv","a+") as result:
-                    result.write(str(info))
-                    result.write("\n")
-                time.sleep(0.3)
-
-        else:
-            print("urls.req文件为空，请检查")
-
 def do_task():
-    '''执行页面读取任务'''
-    with open("./output/urls.req","r") as f:
-        urls = f.readlines()
-    if len(urls) != 0:
-        for url in urls:
-            info = getHouseInfo(url[:-1])
-            insert_lianjia_house_json(info)
+    create_house_info_db(20)
 
 if __name__ == "__main__":
 
@@ -102,7 +80,7 @@ if __name__ == "__main__":
             
         # python3 spider_main.py test - 测试代码
         elif operation == "test":
-            getHouseInfo("https://sh.lianjia.com/zufang/107002352480.html")
+            pass
 
         # python3 spider_main.py test1 - 测试代码 - IP代理多进程多线程测试 (由于调用频次限制 目前暂时不采用此方法)
         # 测试结果采用多进程对速度的提升没有显著的影响，因此暂时不采用这种方法
