@@ -69,7 +69,7 @@ if __name__ == "__main__":
         # python3 spider_main.py all - 获取所有待爬取的url列表 后 获取房源详情
         elif operation == "all":
             create_task(dic_list_all)
-            # do_task()
+            do_task()
 
         # python3 spider_main.py all1 - 先获取所有商圈 后 获取所有待爬url 后 获取房源详情
         elif operation == "all1":
