@@ -27,9 +27,16 @@ sudo apt-get install python-bs4
 pip3 install requests
 pip3 install beautifulsoup4
 
+# 数据库连接模块
+pip3 install PyMySQL
+
+########## 以下为伪造请求需要的库 ##########
 # 以下为使用socket5代理需要安装，其中PySocks可能会在上一个命令中自动安装
 pip3 install requests\[socks\]
 pip3 install PySocks
+
+# 伪造UA安装库
+pip3 install fake-useragent
 
 ```
 

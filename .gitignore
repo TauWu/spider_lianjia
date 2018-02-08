@@ -1,4 +1,13 @@
 *.pyc
+
+# 日志文件
 *.log
+
+# Python缓存文件
 __pycache__/
+
+# VS Code配置文件
+/.vscode/
+
+# 配置文件
 config.py
