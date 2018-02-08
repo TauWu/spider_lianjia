@@ -6,7 +6,7 @@ import csv
 
 from module.spider.select_url import create_select_house_info_file, create_select_house_info_db, dic_list_all, get_dic_url, get_pages
 from module.spider.spider_page import create_house_info_db
-
+from module.spider.spider_stat import create_house_stat_db
 
 def create_task(busi_area):
     '''创建任务 - 通过商圈名称确定下一步需要爬取的房源详情链接列表'''
@@ -35,16 +35,39 @@ def create_task_csv(csv_file):
         task = next(tasks)
     create_task(task)
 
-def do_task():
-    create_house_info_db(20)
+def page_task(start=0,num=80):
+    '''分批爬取数据库中存入的house_id对应的房间详情页面信息'''
+    create_house_info_db(start=start, num=num)
+
+def stat_task(start=0,num=80):
+    '''分批爬取数据库中存入的house_id对应的统计接口信息'''
+    create_house_stat_db(start=start, num=num)
+
 
 if __name__ == "__main__":
 
-    # 爬取task.csv中列出的区域房源信息
+    # 程序流程
+    info = '''程序爬虫主要流程：
+
+    1. 爬取筛选页面，筛选条件是筛选结果页数小于100的地标
+    2. 爬取详情页面，从数据库头遍历
+    3. 爬取统计接口，从数据库头遍历
+
+spider_main 后置参数说明：
+
+    - create 爬虫第一步
+    - page 爬虫第二步
+    - stat 爬虫第三步
+    - all 串行执行第三步
+    
+    '''
+
+    print(info)
+
+    # python3 spider_main.py - 12 - 爬取task.csv中列出的区域房源信息
     if len(sys.argv) == 1:
-        # python3 spider_main.py
         create_task_csv("task.csv")
-        do_task()
+        page_task()
 
     # 执行主程序携带一个操作参数
     elif len(sys.argv) == 2:
@@ -52,31 +75,39 @@ if __name__ == "__main__":
         
         operation = sys.argv[1].strip()
 
-        # python3 spider_main.py do - 爬取./output/urls.req目录下所有url对应的房源详情列表
-        if operation == "do":
-            #TODO
-            do_task()
-
-        # python3 spider_main.py create - 默认从csv文件中获取待爬取的url列表
-        elif operation == "create":
+        # python3 spider_main.py create - 1 -  默认从csv文件中获取待爬取的url列表
+        if operation == "create":
             create_task_csv("task.csv")
 
-        # python3 spider_main.py spider - 从csv文件中获取待爬取的url列表 后 获取房源详情
+        # python3 spider_main.py page - 2 - 爬取房源详情列表
+        elif operation == "page":
+            #TAG 这里可以修改第二步爬虫的起始和并发量
+            page_task(start=0,num=20)
+
+        # python3 spider_main.py stat - 3 - 从头获取数据库中所有的房源统计信息
+        elif operation == "stat":
+            #TAG 这里可以修改第三步爬虫的起始和并发量
+            stat_task(start=0,num=80)
+
+        # python3 spider_main.py spider - 123 - 从csv文件中获取待爬取的url列表 后 获取房源详情 后 获取统计详情
         elif operation == "spider":
             create_task_csv("task.csv")
-            do_task()
+            page_task()
+            stat_task()
 
-        # python3 spider_main.py all - 获取所有待爬取的url列表 后 获取房源详情
+        # python3 spider_main.py all - 123 - 获取所有待爬取的url列表 后 获取房源详情 后 获取统计详情
         elif operation == "all":
             create_task(dic_list_all)
-            do_task()
+            page_task()
+            stat_task()
 
-        # python3 spider_main.py all1 - 先获取所有商圈 后 获取所有待爬url 后 获取房源详情
+        # python3 spider_main.py all1 - 123 - 先获取所有商圈 后 获取所有待爬url 后 获取房源详情 后 获取统计详情
         elif operation == "all1":
             dic_list = get_dic_url()
             print(dic_list)
             create_task(dic_list_all)
-            do_task()
+            page_task()
+            stat_task()
             
         # python3 spider_main.py test - 测试代码
         elif operation == "test":
@@ -103,7 +134,7 @@ if __name__ == "__main__":
             content_list = next(content_list)
             for content in content_list:
                 content_compile = re.compile("<center>(.+)</center>")
-                ip_info = re.findall(content_compile, content.decode("gb2312"))
+                ip_info = re.findall(content_compile, content[0].decode("gb2312"))
                 print(ip_info)
 
         # python3 spider_main.py test3 - 测试代码 - IP代理验证测试
@@ -135,14 +166,23 @@ if __name__ == "__main__":
         operation = sys.argv[1].strip()
         argv1 = sys.argv[2].strip()
 
-        # python3 spider_main.py create [argv] - 获取指定商圈待爬取的url列表
+        # python3 spider_main.py create [argv] - 1 - 获取指定商圈待爬取的url列表
         if operation == "create":
             create_task([argv1])
 
-        # python3 spider_main.py spider [argv] - 获取指定商圈待爬取的url列表 后 获取房源详情
+        # python3 spider_main.py page [argv] - 2 -  爬取房源详情信息 - 参数为并发量
+        elif operation == "page":
+            page_task(int(argv1))
+
+        # python3 spider_main.py page [argv] - 3 -  爬取房源统计信息 - 参数为并发量
+        elif operation == "stat":
+            stat_task(int(argv1))
+
+        # python3 spider_main.py spider [argv] - 123 - 获取指定商圈待爬取的url列表 后 获取房源详情 后获取房源统计
         elif operation == "spider":
             create_task([argv1])
-            do_task()
+            page_task()
+            stat_task()
 
         else:
             raise ValueError("没有这个操作")

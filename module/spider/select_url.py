@@ -118,7 +118,7 @@ def get_select_house_infoss(busi_area):
 
     for page_texts in contents:
         for page_text in page_texts:
-            select_house_infos = get_select_house_infos(str(page_text.decode("utf-8")))
+            select_house_infos = get_select_house_infos(str(page_text[0].decode("utf-8")))
             print("本页房源数量：", len(select_house_infos))
             select_house_infoss+=select_house_infos
 
@@ -174,7 +174,7 @@ def create_select_house_info_db(dic_list):
     for dic in dic_list:
         select_house_infos = get_select_house_infoss(dic)
         print("%s有%d套房源"%(dic, len(select_house_infos)))
-        lj_db.insert_house(select_house_infos)
+        lj_db.insert_house(dic, select_house_infos)
     
     lj_db.close
 

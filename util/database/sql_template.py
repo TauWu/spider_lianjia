@@ -5,7 +5,6 @@ import time
 
 local_date = str(time.strftime("%Y-%m-%d", time.localtime()))
 
-print(local_date)
 
 # 房源信息插入SQL语句 - 插入搜索出的房源列表
 house_info_insert_sql = """
@@ -14,17 +13,17 @@ insert into
     `community_id`,`community_name`,`house_type`,`house_area`,
     `orientation`,`distinct_name`,`house_floor`,`house_total_floor`,
     `house_create_year`,`see_count`,`house_price`,`sale_date`,
-    `extra_info_select`)
+    `extra_info_select`, `district`)
 values
     ("%s", "{insert_date}", "%s", "%s", 
     "%s", "%s", "%s", "%s", "%s", "%s",
-    "%s", "%s", %s, %s, "%s", "%s")
-""".format(insert_date=str(local_date))
+    "%s", "%s", %s, %s, "%s", "%s", "{district}")
+"""
 
 # 获取库存总量SQL
 get_count_sql = """
 select
-    count(1)
+    max(id)
 from
     lianjia_house_info
 """
@@ -60,3 +59,24 @@ set
 where
     house_id = "{house_id}"
 """
+
+# 更新房源统计数据SQL
+update_house_stat_sql = """
+update
+    lianjia_house_info
+set
+    position = "%s", see_stat_total = %s, 
+    see_stat_weekly = %s, community_sold_count = %s,
+    busi_sold_count = %s
+where
+    house_id = "{house_id}"
+"""
+
+# 插入房源统计数据jsonSQL
+insert_house_stat_json_sql = """
+insert into
+    lianjia_house_stat_json
+    (`house_id`, `insert_date`, `house_stat_json`)
+values
+    ("%s", "{insert_date}", '%s')
+""".format(insert_date=str(local_date))

@@ -108,25 +108,27 @@ def get_house_infos(house_id_list):
 
     for page_texts in contents:
         for page_text in page_texts:
-            house_info = get_house_info(str(page_text.decode('utf-8')))
+            house_info = get_house_info(str(page_text[0].decode('utf-8')))
             house_infos.append(house_info)
 
     return house_infos
 
-def create_house_info_db(num=10):
+def create_house_info_db(start=0,num=80):
     '''将获取到的房源详情的数据写入到数据库'''
     sys.path.append("../..")
     from util.database import LJDBController
 
     lj_db = LJDBController()
 
-    house_id_lists = lj_db.get_house_ids(num=num)
+    house_id_lists = lj_db.get_house_ids(start=start, num=num)
     for house_id_list in house_id_lists:
         house_id_list_req = list()
         for house_id in house_id_list:
             house_id_list_req.append(house_id[0])
         s = get_house_infos(house_id_list_req)
         lj_db.update_house_info(s)
+
+    lj_db.close
 
 if __name__ == "__main__":
     create_house_info_db(num=20)

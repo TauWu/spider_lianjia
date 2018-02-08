@@ -44,7 +44,7 @@ class CheatRequests(ProxiesRequests):
         self._urls = urlss
         self.content_list += self.req_content_list
         for content in self.content_list:
-            print("########",re.findall("来自(.+)", str(content.decode('gb2312'))))
+            print("########",re.findall("来自(.+)", str(content[0].decode('gb2312'))))
         return
 
     @property

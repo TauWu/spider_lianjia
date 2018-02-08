@@ -60,7 +60,7 @@ class ProxiesRequests(ProxiesHeaders):
 
     def _proxy_request_(self, url):
         self._proxy_content_singal_(url)
-        self._content.append(self._single_content)
+        self._content.append((self._single_content, url))
 
     def _proxy_content_singal_(self, url):
         '''发起单个的代理请求 可被继承'''
