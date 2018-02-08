@@ -36,7 +36,12 @@ def get_house_info(page_text):
     house_info = list()
 
     # 获取房间编号
-    house_id_soup = soup.findChild("span",{"class":"houseNum"})
+    try:
+        house_id_soup = soup.findChild("span",{"class":"houseNum"})
+    except AttributeError:
+        print("BS解析错误", page_text)
+        return house_info
+        
     house_id_compile = "([\dSH]+)"
     house_id = re.findall(house_id_compile, str(house_id_soup))[0]
 

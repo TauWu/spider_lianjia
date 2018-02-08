@@ -35,8 +35,12 @@ def get_select_house_infos(page_text):
     bs4 = BeautifulSoup(page_text, "lxml")
     select_house_infos = list()
     
-    room_list = bs4.findChild("div",{"class":"main-box clear"}).findChild("div",{"class":"con-box"}).findChild("div",{"class":"list-wrap"}).findChild("ul",{"class","house-lst"}).findChildren("li")
-    
+    try:
+        room_list = bs4.findChild("div",{"class":"main-box clear"}).findChild("div",{"class":"con-box"}).findChild("div",{"class":"list-wrap"}).findChild("ul",{"class","house-lst"}).findChildren("li")
+    except AttributeError:
+        print("BS解析错误", page_text)
+        return select_house_infos
+
     if len(re.findall("list-no-data",str(room_list))) != 0:
         return select_house_infos
     for room_info in room_list:
