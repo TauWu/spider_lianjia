@@ -4,7 +4,7 @@ CREATE TABLE `lianjia_house_info` (
   `house_title` varchar(63) NOT NULL COMMENT '房源标题' DEFAULT '',
   `insert_date` varchar(15) NOT NULL COMMENT '入库日期' DEFAULT '',
   `district` varchar(31) NOT NULL COMMENT '行政区' DEFAULT '',
-  `community_id` varchar(15) NOT NULL COMMENT '地标ID' DEFAULT '',
+  `community_id` varchar(31) NOT NULL COMMENT '地标ID' DEFAULT '',
   `community_name` varchar(31) NOT NULL COMMENT '地标名称' DEFAULT '',
   `house_type` varchar(8) NOT NULL COMMENT '房型' DEFAULT '',
   `house_type_new` varchar(31) NOT NULL COMMENT '房型（详情页面）' DEFAULT '',

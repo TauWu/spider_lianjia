@@ -82,7 +82,7 @@ spider_main 后置参数说明：
         # python3 spider_main.py page - 2 - 爬取房源详情列表
         elif operation == "page":
             #TAG 这里可以修改第二步爬虫的起始和并发量
-            page_task(start=0,num=20)
+            page_task(start=10480,num=80)
 
         # python3 spider_main.py stat - 3 - 从头获取数据库中所有的房源统计信息
         elif operation == "stat":

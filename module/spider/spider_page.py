@@ -43,7 +43,11 @@ def get_house_info(page_text):
         return house_info
         
     house_id_compile = "([\dSH]+)"
-    house_id = re.findall(house_id_compile, str(house_id_soup))[0]
+    house_id = re.findall(house_id_compile, str(house_id_soup))
+    if len(house_id) == 0:
+        return house_info
+    else:
+        house_id = house_id[0]
 
     house_info.append(house_id)
 
