@@ -5,4 +5,5 @@
 
 ### 目录文件介绍
 名称 | 功能
-insert.py | 向数据库中插入一条数据
+__init__.py | 数据库操作的封装
+sql_template.py | SQL模板文件

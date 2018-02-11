@@ -68,6 +68,7 @@ spider_main 后置参数说明：
     if len(sys.argv) == 1:
         create_task_csv("task.csv")
         page_task()
+        stat_task()
 
     # 执行主程序携带一个操作参数
     elif len(sys.argv) == 2:
@@ -75,27 +76,27 @@ spider_main 后置参数说明：
         
         operation = sys.argv[1].strip()
 
-        # python3 spider_main.py create - 1 -  默认从csv文件中获取待爬取的url列表
+        # python3 spider_main.py create - 1 -  默认从csv文件中获取待爬取的商圈列表 后 执行第一步
         if operation == "create":
             create_task_csv("task.csv")
 
         # python3 spider_main.py page - 2 - 爬取房源详情列表
         elif operation == "page":
             #TAG 这里可以修改第二步爬虫的起始和并发量
-            page_task(start=10480,num=80)
+            page_task(start=0,num=80)
 
         # python3 spider_main.py stat - 3 - 从头获取数据库中所有的房源统计信息
         elif operation == "stat":
             #TAG 这里可以修改第三步爬虫的起始和并发量
             stat_task(start=0,num=80)
 
-        # python3 spider_main.py spider - 123 - 从csv文件中获取待爬取的url列表 后 获取房源详情 后 获取统计详情
+        # python3 spider_main.py spider - 123 - 从csv文件中获取待爬取的商圈列表 后 执行第一步 后 获取房源详情 后 获取统计详情
         elif operation == "spider":
             create_task_csv("task.csv")
             page_task()
             stat_task()
 
-        # python3 spider_main.py all - 123 - 获取所有待爬取的url列表 后 获取房源详情 后 获取统计详情
+        # python3 spider_main.py all - 123 - 获取所有待爬取的商圈列表 后 执行第一步 后 获取房源详情 后 获取统计详情
         elif operation == "all":
             create_task(dic_list_all)
             page_task()
@@ -166,7 +167,7 @@ spider_main 后置参数说明：
         operation = sys.argv[1].strip()
         argv1 = sys.argv[2].strip()
 
-        # python3 spider_main.py create [argv] - 1 - 获取指定商圈待爬取的url列表
+        # python3 spider_main.py create [argv] - 1 - 获取指定商圈待爬取的商圈列表 后 执行第一步
         if operation == "create":
             create_task([argv1])
 
@@ -178,7 +179,7 @@ spider_main 后置参数说明：
         elif operation == "stat":
             stat_task(int(argv1))
 
-        # python3 spider_main.py spider [argv] - 123 - 获取指定商圈待爬取的url列表 后 获取房源详情 后获取房源统计
+        # python3 spider_main.py spider [argv] - 123 - 获取指定商圈待爬取的商圈列表 后 执行第一步 后 获取房源详情 后获取房源统计
         elif operation == "spider":
             create_task([argv1])
             page_task()
