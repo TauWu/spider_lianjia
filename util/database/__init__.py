@@ -80,8 +80,8 @@ class LJDBController(DBController):
         from .sql_template import update_house_info_sql
 
         for house_info in house_info_list:
+            update_house_info_sql_exec = (update_house_info_sql.format(house_id=house_info[0]))%(tuple(house_info[1:]))
             try:
-                update_house_info_sql_exec = (update_house_info_sql.format(house_id=house_info[0]))%(tuple(house_info[1:]))
                 DBController.execute(self, update_house_info_sql_exec)
                 print("更新房源【%s】详情成功"%house_info[0])
             except Exception as e:

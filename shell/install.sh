@@ -18,8 +18,11 @@ pip3 install beautifulsoup4
 pip3 install PyMySQL
 pip3 install fake-useragent
 pip3 install gevent
+pip3 install lxml
 
 # Clone项目
+mkdir /data/
+mkdir /data/code/
 mkdir /data/code/yujian/
 sudo chmod -R 777 /data/code/
 cd /data/code/yujian/
