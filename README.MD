@@ -27,6 +27,7 @@ sudo apt-get install python-bs4
 # 安装依赖库
 pip3 install requests
 pip3 install beautifulsoup4
+pip3 install lxml
 pip3 install PyMySQL
 pip3 install gevent
 pip3 install fake-useragent
