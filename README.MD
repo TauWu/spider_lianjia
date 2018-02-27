@@ -61,13 +61,15 @@ pip3 install PySocks
 - **stat** - 爬虫第三步：爬取内置统计接口，从数据库头遍历
 
 #### 具体操作案例说明：
-- 1. **python3 spider_main.py** 读取程序根目录下task.csv文件中的商圈名称，并依次执行第1、2、3步。
-- 2. **python3 spider_main.py create** 从task.csv文件中获取待爬取商圈，同时执行爬虫第一步（写入lianjia\_house\_info表中）
-- 3. **python3 spider_main.py page** 从lianjia\_house\_info表中第一个开始往后以某一固定步长请求房源详情页面，更新第一步未获取到的字段
-- 4. **python3 spider_main.py stat** 从lianjia\_house\_info表中第一个开始往后以某一固定步长请求房源销售接口，更新第一步未获取到的字段
-- 5. **python3 spider_main.py all** 爬取所有商圈的所有房源，并且执行所有步骤（约9小时）
-- 6. **python3 spider_main.py all1** 先获取所有商圈的列表 后爬取所有商圈的所有房源，并且执行所有步骤（约9小时）
-- 7. **python3 spider_main.py create [argv1]** 从参数中获取待爬取商圈，同时执行爬虫第一步（写入lianjia\_house\_info表中）
-- 8. **python3 spider_main.py page [argv1]** 从参数中获取并发量，同时执行爬虫第二步（写入lianjia\_house\_info表中）
-- 9. **python3 spider_main.py stat [argv1]** 从参数中获取并发量，同时执行爬虫第三步（写入lianjia\_house\_info表中）
-- 10. **python3 spider_main.py spider [argv1]** 从参数中获取待爬取商圈，同时执行爬虫第1、2、3步（写入lianjia\_house\_info表中）
+编号 | 命令 | 说明
+--- | --- | ---
+1| python3 spider_main.py |读取程序根目录下task.csv文件中的商圈名称，并依次执行第1、2、3步。
+2| python3 spider_main.py create | 从task.csv文件中获取待爬取商圈，同时执行爬虫第一步（写入lianjia\_house\_info表中）
+3| python3 spider_main.py page | 从lianjia\_house\_info表中第一个开始往后以某一固定步长请求房源详情页面，更新第一步未获取到的字段
+4| python3 spider_main.py stat | 从lianjia\_house\_info表中第一个开始往后以某一固定步长请求房源销售接口，更新第一步未获取到的字段
+5| python3 spider_main.py all | 爬取所有商圈的所有房源，并且执行所有步骤（约9小时）
+6| python3 spider_main.py all1 | 先获取所有商圈的列表 后爬取所有商圈的所有房源，并且执行所有步骤（约9小时）
+7| python3 spider_main.py create [argv1] | 从参数中获取待爬取商圈，同时执行爬虫第一步（写入lianjia\_house\_info表中）
+8| python3 spider_main.py page [argv1] | 从参数中获取并发量，同时执行爬虫第二步（写入lianjia\_house\_info表中）
+9| python3 spider_main.py stat [argv1] | 从参数中获取并发量，同时执行爬虫第三步（写入lianjia\_house\_info表中）
+10| python3 spider_main.py spider [argv1] | 从参数中获取待爬取商圈，同时执行爬虫第1、2、3步（写入lianjia\_house\_info表中）
