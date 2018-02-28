@@ -17,6 +17,7 @@ yum install python-bs4
 yum install git
 
 # 安装依赖库
+pip3 install --upgrade pip
 pip3 install requests
 pip3 install beautifulsoup4
 pip3 install PyMySQL
