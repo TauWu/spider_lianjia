@@ -1,8 +1,10 @@
 -- 空服务器建表语句 只执行一次
 
-CREATE DATABASE `spider_data`;
+CREATE DATABASE IF NOT EXISTS `spider_data`;
 
-CREATE TABLE `lianjia_house_info` (
+USE `spider_data`;
+
+CREATE TABLE IF NOT EXISTS `lianjia_house_info` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `house_id` varchar(15) NOT NULL COMMENT '房源编号',
   `house_title` varchar(63) NOT NULL COMMENT '房源标题' DEFAULT '',
@@ -39,7 +41,7 @@ CREATE TABLE `lianjia_house_info` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-CREATE TABLE `lianjia_house_stat_json` (
+CREATE TABLE IF NOT EXISTS `lianjia_house_stat_json` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `house_id` varchar(15) NOT NULL COMMENT '房源编号',
   `insert_date` varchar(15) NOT NULL COMMENT '入库日期' DEFAULT '',

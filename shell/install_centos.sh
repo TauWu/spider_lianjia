@@ -49,10 +49,20 @@ pip3 install lxml
 mkdir /data/
 mkdir /data/code/
 mkdir /data/code/yujian/
-sudo chmod -R 777 /data/code/
+chmod -R 777 /data/code/
 cd /data/code/yujian/
 git clone git@github.com:TauWu/spider_lianjia.git
 
 # 测试代理
 cd /data/code/yujian/spider_lianjia/
 python3 spider_main.py test1
+
+# MySQL配置
+yum install mysql-server
+yum install mysql-client
+
+mysql -u root -p < /data/code/yujian/spider_lianjia/database/create_database.sql
+
+# 测试爬虫代码
+cd /data/code/yujian/spider_lianjia/
+python3 spider_main.py spider
