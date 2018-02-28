@@ -1,7 +1,11 @@
--- 空服务器建表语句 只执行一次
+-- 日常数据跑批SQL语句
 
-CREATE DATABASE `spider_data`;
+-- 修改之前的爬虫数据表名称
+RENAME TABLE `lianjia_house_info` TO `lianjia_house_info_bak`;
 
+RENAME TABLE `lianjia_house_stat_json` TO `lianjia_house_stat_json_bak`;
+
+-- 生成新的空的爬虫数据表
 CREATE TABLE `lianjia_house_info` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `house_id` varchar(15) NOT NULL COMMENT '房源编号',
