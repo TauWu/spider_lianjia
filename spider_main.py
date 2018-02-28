@@ -35,13 +35,46 @@ def create_task_csv(csv_file):
         task = next(tasks)
     create_task(task)
 
-def page_task(start=0,num=80):
+def page_task(start=0,num=50):
     '''分批爬取数据库中存入的house_id对应的房间详情页面信息'''
     create_house_info_db(start=start, num=num)
 
-def stat_task(start=0,num=80):
+def page_task_proc():
+    '''开启多进程，本进程150秒后执行 详情页面爬虫'''
+    time.sleep(150)
+    page_task()
+
+def stat_task(start=0,num=50):
     '''分批爬取数据库中存入的house_id对应的统计接口信息'''
     create_house_stat_db(start=start, num=num)
+
+def stat_task_proc():
+    '''开启多进程，本进程150秒后执行 统计接口爬虫'''
+    time.sleep(150)
+    stat_task()
+
+def spider_proc(fromtype=0,busi_area=dic_list_all):
+    '''多进程爬虫启动'''
+    from multiprocessing import Process
+    
+    p_create = Process()
+    # 从文件读取商圈列表
+    if fromtype == 0:
+        p_create = Process(target=create_task_csv, args=("task.csv",))
+
+    # 直接获取的商圈列表
+    elif fromtype == 1:
+        p_create = Process(target=create_task, args=(busi_area,))
+    
+    else:
+        raise ValueError("参数错误，程序结束！")
+
+    p_page = Process(target=page_task_proc)
+    p_stat = Process(target=stat_task_proc)
+
+    p_create.start()
+    p_page.start()
+    p_stat.start()
 
 
 if __name__ == "__main__":
@@ -66,9 +99,7 @@ spider_main 后置参数说明：
 
     # python3 spider_main.py - 12 - 爬取task.csv中列出的区域房源信息
     if len(sys.argv) == 1:
-        create_task_csv("task.csv")
-        page_task()
-        stat_task()
+        spider_proc()
 
     # 执行主程序携带一个操作参数
     elif len(sys.argv) == 2:
@@ -83,32 +114,26 @@ spider_main 后置参数说明：
         # python3 spider_main.py page - 2 - 爬取房源详情列表
         elif operation == "page":
             #TAG 这里可以修改第二步爬虫的起始和并发量
-            page_task(start=0,num=80)
+            page_task(start=802,num=50)
 
         # python3 spider_main.py stat - 3 - 从头获取数据库中所有的房源统计信息
         elif operation == "stat":
             #TAG 这里可以修改第三步爬虫的起始和并发量
-            stat_task(start=0,num=80)
+            stat_task(start=0,num=50)
 
         # python3 spider_main.py spider - 123 - 从csv文件中获取待爬取的商圈列表 后 执行第一步 后 获取房源详情 后 获取统计详情
         elif operation == "spider":
-            create_task_csv("task.csv")
-            page_task()
-            stat_task()
+            spider_proc()
 
         # python3 spider_main.py all - 123 - 获取所有待爬取的商圈列表 后 执行第一步 后 获取房源详情 后 获取统计详情
         elif operation == "all":
-            create_task(dic_list_all)
-            page_task()
-            stat_task()
+            spider_proc(1)
 
         # python3 spider_main.py all1 - 123 - 先获取所有商圈 后 获取所有待爬url 后 获取房源详情 后 获取统计详情
         elif operation == "all1":
             dic_list = get_dic_url()
             print(dic_list)
-            create_task(dic_list_all)
-            page_task()
-            stat_task()
+            spider_proc(1,dic_list)
             
         # python3 spider_main.py test - 测试代码
         elif operation == "test":
@@ -181,9 +206,7 @@ spider_main 后置参数说明：
 
         # python3 spider_main.py spider [argv] - 123 - 获取指定商圈待爬取的商圈列表 后 执行第一步 后 获取房源详情 后获取房源统计
         elif operation == "spider":
-            create_task([argv1])
-            page_task()
-            stat_task()
+            spider_proc(1, [argv1])
 
         else:
             raise ValueError("没有这个操作")
