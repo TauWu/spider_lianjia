@@ -118,6 +118,10 @@ def get_house_infos(house_id_list):
     for page_texts in contents:
         for page_text in page_texts:
             house_info = get_house_info(str(page_text[0].decode('utf-8')))
+            if len(house_info) == 0:
+                print("[IndexError]更新页面详情数据错误\tpage_text:\n%s\n[/IndexError]", str(page_text[0].decode('utf-8')))
+                continue
+                
             house_infos.append(house_info)
 
     return house_infos
