@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from module.database import DBController
-import time
+from util.common.date import Time
 import sys
 
 # 这里存放可能会有操作的SQL语句模板
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     db = DBController()
     
     # 获取当前时间
-    t = time.strftime("%Y%m%d_%H%M%S",time.localtime())
+    t = Time.now_datetime_str()
 
     # 不携带参数的情况下交互式数据库操作
     if len(sys.argv) == 1:

@@ -224,7 +224,6 @@ class IPVaildator(IPDBController):
         return IPDBController.available_list(self)
 
     def test_requests(self):
-        import time
 
         ip_port_list = self.available_proxies_full
         for ip_port in ip_port_list:

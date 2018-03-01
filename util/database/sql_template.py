@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 # 本处存放SQL语句模板
 
-import time
+from ..common.date import Time
 
-local_date = str(time.strftime("%Y-%m-%d", time.localtime()))
-
+local_date = Time.ISO_date_str()
 
 # 房源信息插入SQL语句 - 插入搜索出的房源列表
 house_info_insert_sql = """
