@@ -8,6 +8,8 @@ from module.spider.select_url import create_select_house_info_file, create_selec
 from module.spider.spider_page import create_house_info_db
 from module.spider.spider_stat import create_house_stat_db
 
+from util.common.logger import log_base
+
 def create_task(busi_area):
     '''创建任务 - 通过商圈名称确定下一步需要爬取的房源详情链接列表'''
     busi_area_out = busi_area[:]
@@ -78,6 +80,8 @@ def spider_proc(fromtype=0,busi_area=dic_list_all):
 
 
 if __name__ == "__main__":
+
+    logger = log_base("spider")
 
     # 程序流程
     info = '''程序爬虫主要流程：
