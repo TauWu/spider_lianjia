@@ -3,6 +3,7 @@
 
 from module.database import DBController
 import time
+import sys
 
 # 这里存放可能会有操作的SQL语句模板
 house_info_name = "lianjia_house_info"
@@ -111,15 +112,42 @@ if __name__ == "__main__":
     # 获取当前时间
     t = time.strftime("%Y%m%d_%H%M%S",time.localtime())
 
-    while True:
+    # 不携带参数的情况下交互式数据库操作
+    if len(sys.argv) == 1:
 
-        opeartor = input(welcome_str)
+        while True:
 
-        if opeartor.strip() == "0":
-            print("程序退出...")
-            break
+            opeartor = input(welcome_str)
 
-        elif opeartor.strip() == "1":
+            if opeartor.strip() == "0":
+                print("程序退出...")
+                break
+
+            elif opeartor.strip() == "1":
+                print("开始备份数据表...")
+                backup_table(db, t)
+                print("备份完成！")
+
+            elif opeartor.strip() == "2":
+                print("开始清空该数据表...")
+                truncate(db)
+                print("清空完成！")
+
+            elif opeartor.strip() == "3":
+                print("开始创建新的数据表...")
+                create(db)
+                print("创建完成！")
+
+            else:
+                print("\n【%s】操作不存在，请重新选择！"%opeartor)
+                continue
+
+    # 携带一个参数的情况下直接执行一次该操作 - 为定时任务开发
+    elif len(sys.argv) == 2:
+
+        opeartor = sys.argv[1]
+
+        if opeartor.strip() == "1":
             print("开始备份数据表...")
             backup_table(db, t)
             print("备份完成！")
@@ -133,9 +161,8 @@ if __name__ == "__main__":
             print("开始创建新的数据表...")
             create(db)
             print("创建完成！")
-
-        else:
-            print("\n【%s】操作不存在，请重新选择！"%opeartor)
-            continue
+    
+    else:
+        raise ValueError("参数太多")
 
     db.close
