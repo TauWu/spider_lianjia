@@ -40,8 +40,8 @@ def page_task(start=0,num=50):
     create_house_info_db(start=start, num=num)
 
 def page_task_proc():
-    '''开启多进程，本进程150秒后执行 详情页面爬虫'''
-    time.sleep(150)
+    '''开启多进程，本进程3000秒后执行 详情页面爬虫'''
+    time.sleep(3000)
     page_task()
 
 def stat_task(start=0,num=50):
@@ -49,8 +49,8 @@ def stat_task(start=0,num=50):
     create_house_stat_db(start=start, num=num)
 
 def stat_task_proc():
-    '''开启多进程，本进程150秒后执行 统计接口爬虫'''
-    time.sleep(150)
+    '''开启多进程，本进程3000秒后执行 统计接口爬虫'''
+    time.sleep(3000)
     stat_task()
 
 def spider_proc(fromtype=0,busi_area=dic_list_all):
