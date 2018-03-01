@@ -2,12 +2,18 @@
 # spider_page 页面数据分析
 
 import sys
-sys.path.append("..")
+sys.path.append("../..")
 
 from ..cheat.random_proxies import CheatRequests
 
 from bs4 import BeautifulSoup
 import re
+
+from util.common.logger import use_logger
+
+@use_logger(level="err")
+def page_err(msg):
+    pass
 
 #TODO 后期请求附加参数将从cheat模块中获取
 headers = {
@@ -39,7 +45,7 @@ def get_house_info(page_text):
     try:
         house_id_soup = soup.findChild("span",{"class":"houseNum"})
     except AttributeError:
-        print("BS解析错误", page_text)
+        page_err("BS解析错误%s"%page_text)
         return house_info
         
     house_id_compile = "([\dSH]+)"
@@ -119,7 +125,7 @@ def get_house_infos(house_id_list):
         for page_text in page_texts:
             house_info = get_house_info(str(page_text[0].decode('utf-8')))
             if len(house_info) == 0:
-                print("[IndexError]更新页面详情数据错误\tpage_text:\n%s\n[/IndexError]", str(page_text[0].decode('utf-8')))
+                page_err("[IndexError]更新页面详情数据错误\tpage_text:%s"%str(page_text[0].decode('utf-8')).replace("\n",""))
                 continue
                 
             house_infos.append(house_info)

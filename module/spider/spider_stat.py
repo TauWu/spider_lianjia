@@ -2,19 +2,25 @@
 # spider_stat 统计接口分析
 
 import sys
-sys.path.append("..")
+sys.path.append("../..")
 
 from ..cheat.random_proxies import CheatRequests
 
 from bs4 import BeautifulSoup
 import re, json
 
+from util.common.logger import use_logger
+
+@use_logger(level="err")
+def stat_err(msg):
+    pass
+
 def get_house_stat(house_stat_json):
 
     try:
         house_stat_dict = json.loads(house_stat_json)
     except Exception as e:
-        print("接口转码错误", e, house_stat_json)
+        stat_err("接口转码错误 %s %s"%(str(e), str(house_stat_json)))
         return False
 
     code = house_stat_dict["code"]
@@ -48,12 +54,12 @@ def get_house_stat(house_stat_json):
         except KeyError:
             busi_sold_count = -1
     else:
-        print("接口获取错误！", house_stat_json)
+        stat_err("接口获取错误！ %s %s"%str(house_stat_json))
 
     try:
         return list((position, see_stat_total, see_stat_weekly, community_sold_count, busi_sold_count, str(house_stat_json)))
     except Exception as e:
-        print("接口转码错误", e, house_stat_json)
+        stat_err("接口转码错误！ %s %s"%(str(e), str(house_stat_json)))
         return False
 
     # 以下是需要的数据

@@ -5,6 +5,12 @@ from module.database import DBController
 from util.common.date import Time
 import sys
 
+from util.common.logger import use_logger
+
+@use_logger(level="info")
+def db_optor_info(msg):
+    pass
+
 # 这里存放可能会有操作的SQL语句模板
 house_info_name = "lianjia_house_info"
 house_stat_name = "lianjia_house_stat_json"
@@ -120,26 +126,26 @@ if __name__ == "__main__":
             opeartor = input(welcome_str)
 
             if opeartor.strip() == "0":
-                print("程序退出...")
+                db_optor_info("程序退出...")
                 break
 
             elif opeartor.strip() == "1":
-                print("开始备份数据表...")
+                db_optor_info("开始备份数据表...")
                 backup_table(db, t)
-                print("备份完成！")
+                db_optor_info("备份完成！")
 
             elif opeartor.strip() == "2":
-                print("开始清空该数据表...")
+                db_optor_info("开始清空该数据表...")
                 truncate(db)
-                print("清空完成！")
+                db_optor_info("清空完成！")
 
             elif opeartor.strip() == "3":
-                print("开始创建新的数据表...")
+                db_optor_info("开始创建新的数据表...")
                 create(db)
-                print("创建完成！")
+                db_optor_info("创建完成！")
 
             else:
-                print("\n【%s】操作不存在，请重新选择！"%opeartor)
+                db_optor_info("\n【%s】操作不存在，请重新选择！"%opeartor)
                 continue
 
     # 携带一个参数的情况下直接执行一次该操作 - 为定时任务开发
@@ -148,19 +154,19 @@ if __name__ == "__main__":
         opeartor = sys.argv[1]
 
         if opeartor.strip() == "1":
-            print("开始备份数据表...")
+            db_optor_info("开始备份数据表...")
             backup_table(db, t)
-            print("备份完成！")
+            db_optor_info("备份完成！")
 
         elif opeartor.strip() == "2":
-            print("开始清空该数据表...")
+            db_optor_info("开始清空该数据表...")
             truncate(db)
-            print("清空完成！")
+            db_optor_info("清空完成！")
 
         elif opeartor.strip() == "3":
-            print("开始创建新的数据表...")
+            db_optor_info("开始创建新的数据表...")
             create(db)
-            print("创建完成！")
+            db_optor_info("创建完成！")
     
     else:
         raise ValueError("参数太多")

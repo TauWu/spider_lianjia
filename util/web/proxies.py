@@ -11,6 +11,16 @@ from gevent import monkey; monkey.patch_all()
 
 # 配置文件
 from .config import *
+from ..common.logger import use_logger
+
+@use_logger(level="warn")
+def req_warn(msg):
+    pass
+
+@use_logger(level="err")
+def req_err(msg):
+    pass
+
 
 # 代理 用户验证部分 - 一天检查一次，所以多次调用时不重复此步骤
 class ProxiesHeaders():
@@ -83,7 +93,7 @@ class ProxiesRequests(ProxiesHeaders):
                 self._single_content = req_content
                 break
             except Exception as e:
-                print("请求失败！正在重新发起...", e)
+                req_warn("请求失败！正在重新发起... %s"%str(e))
                 time.sleep(0.5)
                 continue
 
@@ -128,7 +138,7 @@ class ProxiesVaild(ProxiesRequests):
             ip_info = ip_info[0]
             return ip_info
         except Exception as e:
-            print("未有匹配", e, "\ncontent:", content)
+            req_err("未有匹配 %s %s %s"%(str(e)," content: ", content))
             return
 
     @property
@@ -137,7 +147,7 @@ class ProxiesVaild(ProxiesRequests):
         for url in self.vaild_urls:
             self._proxy_request_(url)
         for _single_content in self._content:
-            self.ip_infos.append(self._get_ip_info_(_single_content.decode("gb2312")))
+            self.ip_infos.append(self._get_ip_info_(_single_content[0].decode("gb2312")))
         return self.ip_infos
 
     @property

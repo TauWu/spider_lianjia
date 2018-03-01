@@ -4,17 +4,26 @@
 # 2.将拼接好的URL存入到output文件夹中待用
 
 import sys
-sys.path.append("..")
+sys.path.append("../..")
 
 import requests
 from bs4 import BeautifulSoup
 from .spider_page import headers
 import re
 import random, time
+from util.common.logger import use_logger
 
 from ..cheat.random_proxies import CheatRequests
 
 raw_url = "https://sh.lianjia.com/zufang/{busi_area}/"
+
+@use_logger(level="err")
+def create_err(msg):
+    pass
+
+@use_logger(level="info")
+def create_info(msg):
+    pass
 
 def get_pages(busi_area):
     '''获取该区域/商圈下拥有的房间页数'''
@@ -38,7 +47,7 @@ def get_select_house_infos(page_text):
     try:
         room_list = bs4.findChild("div",{"class":"main-box clear"}).findChild("div",{"class":"con-box"}).findChild("div",{"class":"list-wrap"}).findChild("ul",{"class","house-lst"}).findChildren("li")
     except AttributeError:
-        print("BS解析错误", page_text)
+        create_err("BS解析错误%s"%page_text)
         return select_house_infos
 
     if len(re.findall("list-no-data",str(room_list))) != 0:
@@ -123,7 +132,7 @@ def get_select_house_infoss(busi_area):
     for page_texts in contents:
         for page_text in page_texts:
             select_house_infos = get_select_house_infos(str(page_text[0].decode("utf-8")))
-            print("本页房源数量：", len(select_house_infos))
+            create_info("本页房源数量：%d"%len(select_house_infos))
             select_house_infoss+=select_house_infos
 
     return select_house_infoss
@@ -165,7 +174,7 @@ def write_select_house_info(select_house_infos):
 def create_select_house_info_file(dic_list):
     for dic in dic_list:
         select_house_infos = get_select_house_infoss(dic)
-        print("%s有%d套房源"%(dic, len(select_house_infos)))
+        create_info("%s有%d套房源"%(dic, len(select_house_infos)))
         write_select_house_info(select_house_infos)
 
 # 将筛选页面中的房源基础信息写入到数据库中
@@ -177,7 +186,7 @@ def create_select_house_info_db(dic_list):
 
     for dic in dic_list:
         select_house_infos = get_select_house_infoss(dic)
-        print("%s有%d套房源"%(dic, len(select_house_infos)))
+        create_info("%s有%d套房源"%(dic, len(select_house_infos)))
         lj_db.insert_house(dic, select_house_infos)
     
     lj_db.close

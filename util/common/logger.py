@@ -12,8 +12,8 @@ class log_base(object):
     """
     def __init__(self,logger_name):
         logger = logging.getLogger(logger_name)
-        formater = logging.Formatter('PID:%(process)-5s [%(name)s] %(asctime)s %(message)s', '%Y/%m/%d %H:%M:%S')
-        file_handler = logging.FileHandler("../../log/spider_all_{date}.log".format(date=Time.now_date_str()))
+        formater = logging.Formatter('PID:%(process)-5s\t%(asctime)s [%(name)s]\t %(message)s \t', '%Y/%m/%d %H:%M:%S')
+        file_handler = logging.FileHandler("./log/spider_all_{date}.log".format(date=Time.now_date_str()))
         file_handler.setFormatter(formater)
         stream_handler = logging.StreamHandler(sys.stderr)
         logger.addHandler(file_handler)
@@ -22,19 +22,19 @@ class log_base(object):
         self.logger = logger
 
     def err(self, log):
-        self.logger.error("[ERR]\t%s"%log)
+        self.logger.error("[ERR] %s"%log)
 
     def info(self, log):
-        self.logger.info("[INF]\t%s"%log)
+        self.logger.info("[INF] %s"%log)
 
     def fatal(self, log):
-        self.logger.fatal("[FTL]\t%s"%log)
+        self.logger.fatal("[FTL] %s"%log)
 
     def warning(self, log):
-        self.logger.warning("[WRN]\t%s"%log)
+        self.logger.warning("[WRN] %s"%log)
 
     def debug(self, log):
-        self.logger.debug("[DBG]\t%s"%log)
+        self.logger.debug("[DBG] %s"%log)
 
 
 def use_logger(level):
@@ -44,6 +44,7 @@ def use_logger(level):
         logger = log_base(func.__name__)
         def _func(*args, **kwargs):
             '''使用本装饰器的函数要求为日志输出函数 同时要求函数的第一个参数是需要输出的日志'''
+            
             if level == "info":
                 logger.info(args[0])
             elif level == "debug":
@@ -60,6 +61,9 @@ def use_logger(level):
         
     return decorator
 
+@use_logger(level="info")
+def base_info(msg):
+    pass
 
 # 测试代码
 
