@@ -66,4 +66,5 @@ mysql -u root -p < /data/code/yujian/spider_lianjia/database/create_database.sql
 
 # 测试爬虫代码
 cd /data/code/yujian/spider_lianjia/
+python3 install_operator.py
 python3 spider_main.py spider
