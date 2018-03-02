@@ -92,7 +92,7 @@ def get_house_stats(hc_id_list):
 def create_house_stat_db(start=0,num=80):
     '''将获取到的房源统计信息写入到数据库'''
     sys.path.append("../..")
-    from util.database import LJDBController
+    from module.database import LJDBController
 
     lj_db = LJDBController()
     hc_id_lists = lj_db.get_hc_ids(start=start, num=num)

@@ -135,7 +135,7 @@ def get_house_infos(house_id_list):
 def create_house_info_db(start=0,num=80):
     '''将获取到的房源详情的数据写入到数据库'''
     sys.path.append("../..")
-    from util.database import LJDBController
+    from module.database import LJDBController
 
     lj_db = LJDBController()
 

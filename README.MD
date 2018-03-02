@@ -74,3 +74,9 @@ pip3 install PySocks
 8| python3 spider_main.py page [argv1] | 从参数中获取并发量，同时执行爬虫第二步（写入lianjia\_house\_info表中）
 9| python3 spider_main.py stat [argv1] | 从参数中获取并发量，同时执行爬虫第三步（写入lianjia\_house\_info表中）
 10| python3 spider_main.py spider [argv1] | 从参数中获取待爬取商圈，同时执行爬虫第1、2、3步（写入lianjia\_house\_info表中）
+
+#### 程序根目录其他程序的功能
+编号 | 程序名 | 功能
+--- | --- | ---
+1 | database_operator | 数据库操作模块，主要功能是将已经跑批完成的数据表备份为后缀时间，同时新建表来
+2 | install_operator | 爬虫程序安装子模块，主要功能是配置可能会有的配置文件（这些文件不会被上传到git上面）

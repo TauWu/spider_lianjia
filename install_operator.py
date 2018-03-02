@@ -10,7 +10,7 @@ info = """
 安装一台新服务器需要对本程序的环境进行配置：
 具体操作如下：
 1. 代理设置配置 => ./util/web/config.py
-2. 数据库设置配置 => ./module/database/config.py
+2. 数据库设置配置 => ./util/database/config.py
 ---
 
 是否按顺序全部配置？（Y/N）
@@ -65,7 +65,7 @@ def database_config():
 
     passwd = input("请输入本机数据库root密码！")
     base_info("配置数据库密码成功！")
-    with open("./module/database/config.py","w") as config:
+    with open("./util/database/config.py","w") as config:
         config.writelines(db_config_template%passwd)
 
 if __name__ == "__main__":

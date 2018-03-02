@@ -1,7 +1,7 @@
 #!/usr/bin/python3.5
 # -*- coding: utf-8 -*-
 
-from module.database import DBController
+from util.database import DBController
 from util.common.date import Time
 import sys
 

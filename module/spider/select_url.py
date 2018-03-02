@@ -180,7 +180,7 @@ def create_select_house_info_file(dic_list):
 # 将筛选页面中的房源基础信息写入到数据库中
 def create_select_house_info_db(dic_list):
     sys.path.append("../..")
-    from util.database import LJDBController
+    from module.database import LJDBController
 
     lj_db = LJDBController()
 
