@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 # 本处存放SQL语句模板
 
-from ..common.date import Time
+import sys
+sys.path.append("../..")
+from util.common.date import Time
 
 local_date = Time.ISO_date_str()
 
