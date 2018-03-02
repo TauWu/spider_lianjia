@@ -13,7 +13,7 @@ from util.common.logger import use_logger, base_info
 from util.redis import RedisController
 
 @use_logger(level="info")
-def start_process(msg):
+def start_proc(msg):
     '''程序开始日志打印'''
     pass
 
@@ -51,7 +51,7 @@ def page_task(start=0,num=50):
 def page_task_proc():
     '''开启多进程，本进程3000秒后执行 详情页面爬虫'''
     time.sleep(3000)
-    start_process("开始详情页面爬虫进程")
+    start_proc("开始详情页面爬虫进程")
     page_task()
 
 def stat_task(start=0,num=50):
@@ -61,7 +61,7 @@ def stat_task(start=0,num=50):
 def stat_task_proc():
     '''开启多进程，本进程3000秒后执行 统计接口爬虫'''
     time.sleep(3000)
-    start_process("开始统计接口爬虫进程")
+    start_proc("开始统计接口爬虫进程")
     stat_task()
 
 def spider_proc(fromtype=0,busi_area=dic_list_all):
@@ -72,12 +72,12 @@ def spider_proc(fromtype=0,busi_area=dic_list_all):
     # 从文件读取商圈列表
     if fromtype == 0:
         p_create = Process(target=create_task_csv, args=("task.csv",))
-        start_process("开始从商圈读取的列表中创建房间")
+        start_proc("开始从商圈读取的列表中创建房间")
 
     # 直接获取的商圈列表
     elif fromtype == 1:
         p_create = Process(target=create_task, args=(busi_area,))
-        start_process("开始从默认全部列表中创建房间")
+        start_proc("开始从默认全部列表中创建房间")
     
     else:
         raise ValueError("参数错误，程序结束！")
@@ -91,7 +91,7 @@ def spider_proc(fromtype=0,busi_area=dic_list_all):
 
 if __name__ == "__main__":
 
-    start_process("主进程开始")
+    start_proc("主进程开始")
 
     # 程序流程
     info = '''程序爬虫主要流程：

@@ -22,7 +22,7 @@ def create_err(msg):
     pass
 
 @use_logger(level="info")
-def create_info(msg):
+def createinfo(msg):
     pass
 
 def get_pages(busi_area):
@@ -132,7 +132,7 @@ def get_select_house_infoss(busi_area):
     for page_texts in contents:
         for page_text in page_texts:
             select_house_infos = get_select_house_infos(str(page_text[0].decode("utf-8")))
-            create_info("本页房源数量：%d"%len(select_house_infos))
+            createinfo("本页房源数量：%d"%len(select_house_infos))
             select_house_infoss+=select_house_infos
 
     return select_house_infoss
@@ -174,7 +174,7 @@ def write_select_house_info(select_house_infos):
 def create_select_house_info_file(dic_list):
     for dic in dic_list:
         select_house_infos = get_select_house_infoss(dic)
-        create_info("%s有%d套房源"%(dic, len(select_house_infos)))
+        createinfo("%s有%d套房源"%(dic, len(select_house_infos)))
         write_select_house_info(select_house_infos)
 
 # 将筛选页面中的房源基础信息写入到数据库中
@@ -186,7 +186,7 @@ def create_select_house_info_db(dic_list):
 
     for dic in dic_list:
         select_house_infos = get_select_house_infoss(dic)
-        create_info("%s有%d套房源"%(dic, len(select_house_infos)))
+        createinfo("%s有%d套房源"%(dic, len(select_house_infos)))
         lj_db.insert_house(dic, select_house_infos)
     
     lj_db.close

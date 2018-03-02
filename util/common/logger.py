@@ -12,7 +12,7 @@ class log_base(object):
     """
     def __init__(self,logger_name):
         logger = logging.getLogger(logger_name)
-        formater = logging.Formatter('PID:%(process)-5s\t%(asctime)s [%(name)s]\t %(message)s \t', '%Y/%m/%d %H:%M:%S')
+        formater = logging.Formatter('PID:%(process)-5s %(asctime)s [%(name)s] \t%(message)s', '%Y/%m/%d %H:%M:%S')
         file_handler = logging.FileHandler("./log/spider_all_{date}.log".format(date=Time.now_date_str()))
         file_handler.setFormatter(formater)
         stream_handler = logging.StreamHandler(sys.stderr)

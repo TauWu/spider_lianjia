@@ -10,7 +10,7 @@ from .random_headers import random_headers
 from util.common.logger import use_logger
 
 @use_logger(level="info")
-def multireq_log(msg):
+def mureq_log(msg):
     pass
 
 class CheatRequests(ProxiesRequests):
@@ -37,7 +37,7 @@ class CheatRequests(ProxiesRequests):
         '''运行所有的URL列表 *本请求为迭代请求，请注意网络IO压力*'''
         for urls in self.urlss:
             self._urls = urls
-            multireq_log("即将请求%d条URL"%len(self._urls))
+            mureq_log("即将请求%d条URL"%len(self._urls))
             yield self.req_content_list
             # 释放内存占用
             self._content = list()
