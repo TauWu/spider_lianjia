@@ -81,3 +81,13 @@ insert into
 values
     ("%s", "{insert_date}", '%s')
 """.format(insert_date=str(local_date))
+
+# 房源详情遍历失败的房源编号列表获取
+get_house_page_failed_sql = """
+select 
+    house_id 
+from 
+    lianjia_house_info 
+where 
+    house_type_new = ""
+"""

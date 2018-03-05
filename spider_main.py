@@ -10,7 +10,10 @@ from module.spider.spider_page import create_house_info_db
 from module.spider.spider_stat import create_house_stat_db
 
 from util.common.logger import use_logger, base_info
+
+# 测试临时引用
 from util.redis import RedisController
+from module.redis import LJRedisController
 
 @use_logger(level="info")
 def start_proc(msg):
@@ -149,10 +152,11 @@ spider_main 后置参数说明：
             
         # python3 spider_main.py test - 测试代码
         elif operation == "test":
-            r = RedisController()
-            r.rset("1","SH0003407698")
-            print(str(r.rget("1")))
-            r.rdel("1")
+            ljrds = LJRedisController()
+            failed_page =  ljrds.failed_page_get()
+            for pages in failed_page:
+                for page in pages:
+                    print(page[1])
 
         # python3 spider_main.py test1 - 测试代码 - IP代理多进程多线程测试 (由于调用频次限制 目前暂时不采用此方法)
         # 测试结果采用多进程对速度的提升没有显著的影响，因此暂时不采用这种方法

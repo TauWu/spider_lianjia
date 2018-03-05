@@ -116,6 +116,18 @@ class LJDBController(DBController):
                 db_err("更新统计信息错误 %s %s"%(str(e), update_house_stat_sql_exec))
 
     @property
+    def get_house_page_failed(self):
+        '''返回获取房源页面详情信息失败的房源编号列表'''
+        from .sql_template import get_house_page_failed_sql
+
+        DBController.execute(self, get_house_page_failed_sql)
+        house_id_list = list()
+        for house_id in self.cur.fetchall():
+            house_id_list.append(house_id[0])
+        return house_id_list
+
+
+    @property
     def close(self):
         '''关闭数据库连接'''
         DBController.close
