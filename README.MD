@@ -23,6 +23,8 @@ sudo apt-get install python3-pip
 
 # 安装 BeautifulSoup
 sudo apt-get install python-bs4
+# 安装Redis
+sudo apt-get install redis-server
 
 # 安装依赖库
 pip3 install requests
@@ -31,6 +33,7 @@ pip3 install lxml
 pip3 install PyMySQL
 pip3 install gevent
 pip3 install fake-useragent
+pip3 install redis
 
 ########## 以下为可选安装库 ##########
 # 以下为使用socket5代理需要安装，其中PySocks可能会在上一个命令中自动安装
@@ -60,20 +63,23 @@ pip3 install PySocks
 - **create** - 爬虫第一步：爬取筛选页面，筛选条件是页数小于100的地标
 - **page** - 爬虫第二步：爬取详情页面，从数据库头遍历
 - **stat** - 爬虫第三步：爬取内置统计接口，从数据库头遍历
+- **redis** - 爬虫第四步：将第二步爬虫失败的房源存入Redis后，以更小的粒度重新爬取数据
 
 #### 具体操作案例说明：
 编号 | 命令 | 说明
 --- | --- | ---
-1| python3 spider_main.py |读取程序根目录下task.csv文件中的商圈名称，并依次执行第1、2、3步。
+1| python3 spider_main.py |读取程序根目录下task.csv文件中的商圈名称，并依次执行第1、2、3、４步。
 2| python3 spider_main.py create | 从task.csv文件中获取待爬取商圈，同时执行爬虫第一步（写入lianjia\_house\_info表中）
 3| python3 spider_main.py page | 从lianjia\_house\_info表中第一个开始往后以某一固定步长请求房源详情页面，更新第一步未获取到的字段
-4| python3 spider_main.py stat | 从lianjia\_house\_info表中第一个开始往后以某一固定步长请求房源销售接口，更新第一步未获取到的字段
-5| python3 spider_main.py all | 爬取所有商圈的所有房源，并且执行所有步骤（约9小时）
-6| python3 spider_main.py all1 | 先获取所有商圈的列表 后爬取所有商圈的所有房源，并且执行所有步骤（约9小时）
+4| python3 spider_main.py stat | 从lianjia\_house\_info表中第一个开始往后以某一固定步长请求房源销售接口，更新第一步未获取到的字段，并插入json到lianjia\_house\_stat\_json表中
+5| python3 spider_main.py all | 爬取所有商圈的所有房源，并且执行所有步骤
+6| python3 spider_main.py all1 | 先获取所有商圈的列表 后爬取所有商圈的所有房源，并且执行所有步骤
 7| python3 spider_main.py create [argv1] | 从参数中获取待爬取商圈，同时执行爬虫第一步（写入lianjia\_house\_info表中）
 8| python3 spider_main.py page [argv1] | 从参数中获取并发量，同时执行爬虫第二步（写入lianjia\_house\_info表中）
-9| python3 spider_main.py stat [argv1] | 从参数中获取并发量，同时执行爬虫第三步（写入lianjia\_house\_info表中）
-10| python3 spider_main.py spider [argv1] | 从参数中获取待爬取商圈，同时执行爬虫第1、2、3步（写入lianjia\_house\_info表中）
+9| python3 spider_main.py stat [argv1] | 从参数中获取并发量，同时执行爬虫第三步（写入lianjia\_house\_info和lianjia\_house\_stat\_json表中）
+10| python3 spider_main.py spider [argv1] | 从参数中获取待爬取商圈，同时执行爬虫第1、2、3、４步（写入lianjia\_house\_info和lianjia\_house\_stat\_json表中）
+11 | python3 spider_main.py redis | 将第二步爬虫失败的房源存入Redis后，以更小的粒度重新爬取数据
+12 | python3 spider_main.py redis [argv1] | 将第二步爬虫失败的房源存入Redis后，以[argv1]的粒度重新爬取数据
 
 #### 程序根目录其他程序的功能
 编号 | 程序名 | 功能
