@@ -116,7 +116,7 @@ if __name__ == "__main__":
     db = DBController()
     
     # 获取当前时间
-    t = Time.now_datetime_str()
+    t = Time.now_date_str()
 
     # 不携带参数的情况下交互式数据库操作
     if len(sys.argv) == 1:
