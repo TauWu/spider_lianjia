@@ -16,6 +16,9 @@ yum install python-bs4
 # 安装 Git
 yum install git
 
+# 安装Redis
+yum install redis
+
 # 安装依赖库
 pip3 install --upgrade pip
 pip3 install requests
@@ -24,6 +27,7 @@ pip3 install PyMySQL
 pip3 install fake-useragent
 pip3 install gevent
 pip3 install lxml
+pip3 install redis
 
 # Clone项目
 mkdir /data/
