@@ -6,14 +6,10 @@ import sys
 import csv
 
 from module.spider.select_url import create_select_house_info_file, create_select_house_info_db, dic_list_all, get_dic_url, get_pages
-from module.spider.spider_page import create_house_info_db
+from module.spider.spider_page import create_house_info_db, create_house_info_redis
 from module.spider.spider_stat import create_house_stat_db
 
 from util.common.logger import use_logger, base_info
-
-# 测试临时引用
-from util.redis import RedisController
-from module.redis import LJRedisController
 
 @use_logger(level="info")
 def start_proc(msg):
@@ -102,12 +98,14 @@ if __name__ == "__main__":
     1. 爬取筛选页面，筛选条件是筛选结果页数小于100的地标
     2. 爬取详情页面，从数据库头遍历
     3. 爬取统计接口，从数据库头遍历
+    4. 将第二步爬虫失败的房源存入Redis后，以更小的粒度重新爬取数据
 
 spider_main 后置参数说明：
 
     - create 爬虫第一步
     - page 爬虫第二步
     - stat 爬虫第三步
+    - redis 爬虫第四步
     - all 串行执行第三步
     
     '''
@@ -136,27 +134,30 @@ spider_main 后置参数说明：
             #TAG 这里可以修改第三步爬虫的起始和并发量
             stat_task(start=0,num=50)
 
-        # python3 spider_main.py spider - 123 - 从csv文件中获取待爬取的商圈列表 后 执行第一步 后 获取房源详情 后 获取统计详情
+        # python3 spider_main.py redis - 4 - 将第二步爬虫失败的房源存入Redis后，以更小的粒度重新爬取数据
+        elif operation == "redis":
+            create_house_info_redis()
+
+        # python3 spider_main.py spider - 1234 - 从csv文件中获取待爬取的商圈列表 后 执行第一步 后 获取房源详情 后 获取统计详情
         elif operation == "spider":
             spider_proc()
+            create_house_info_redis()
 
-        # python3 spider_main.py all - 123 - 获取所有待爬取的商圈列表 后 执行第一步 后 获取房源详情 后 获取统计详情
+        # python3 spider_main.py all - 1234 - 获取所有待爬取的商圈列表 后 执行第一步 后 获取房源详情 后 获取统计详情
         elif operation == "all":
             spider_proc(1)
+            create_house_info_redis()
 
-        # python3 spider_main.py all1 - 123 - 先获取所有商圈 后 获取所有待爬url 后 获取房源详情 后 获取统计详情
+        # python3 spider_main.py all1 - 1234 - 先获取所有商圈 后 获取所有待爬url 后 获取房源详情 后 获取统计详情
         elif operation == "all1":
             dic_list = get_dic_url()
             base_info(str(dic_list))
             spider_proc(1,dic_list)
+            create_house_info_redis()
             
         # python3 spider_main.py test - 测试代码
         elif operation == "test":
-            ljrds = LJRedisController()
-            failed_page =  ljrds.failed_page_get()
-            for pages in failed_page:
-                for page in pages:
-                    print(page[1])
+            create_house_info_redis()
 
         # python3 spider_main.py test1 - 测试代码 - IP代理多进程多线程测试 (由于调用频次限制 目前暂时不采用此方法)
         # 测试结果采用多进程对速度的提升没有显著的影响，因此暂时不采用这种方法
@@ -211,7 +212,7 @@ spider_main 后置参数说明：
         operation = sys.argv[1].strip()
         argv1 = sys.argv[2].strip()
 
-        # python3 spider_main.py create [argv] - 1 - 获取指定商圈待爬取的商圈列表 后 执行第一步
+        # python3 spider_main.py create [argv] - 1 - 获取指定商圈待爬取的商圈列表 后 执行第一步 - 参数为商圈名称
         if operation == "create":
             create_task([argv1])
 
@@ -222,10 +223,15 @@ spider_main 后置参数说明：
         # python3 spider_main.py page [argv] - 3 -  爬取房源统计信息 - 参数为并发量
         elif operation == "stat":
             stat_task(int(argv1))
+        
+        # python3 spider_main.py redis [argv] - 4 - 将第二步爬虫失败的房源存入Redis后，以更小的粒度重新爬取数据 - 参数为并发量
+        elif operation == "redis":
+            create_house_info_redis(int(argv1))
 
-        # python3 spider_main.py spider [argv] - 123 - 获取指定商圈待爬取的商圈列表 后 执行第一步 后 获取房源详情 后获取房源统计
+        # python3 spider_main.py spider [argv] - 123４ - 获取指定商圈待爬取的商圈列表 后 执行第一步 后 获取房源详情 后获取房源统计 - 参数为商圈名称
         elif operation == "spider":
             spider_proc(1, [argv1])
+            create_house_info_redis()
 
         else:
             raise ValueError("没有这个操作")

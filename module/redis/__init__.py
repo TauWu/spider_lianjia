@@ -22,9 +22,9 @@ class LJRedisController():
     
     def failed_page_get(self, num=20):
         '''将Redis中存储的房源ID按照num的频次返回'''
-        for id in range(0, self._redis.dbsize, 20):
+        for id in range(0, self._redis.dbsize, num):
             house_list_get = list()
-            for i in range(0 ,20):
+            for i in range(0 ,num):
                 idx = id + i + 1
                 house_id = self._redis.rget(str(idx))
                 if house_id.strip() == "n":

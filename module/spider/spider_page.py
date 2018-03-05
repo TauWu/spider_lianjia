@@ -9,7 +9,7 @@ from ..cheat.random_proxies import CheatRequests
 from bs4 import BeautifulSoup
 import re
 
-from util.common.logger import use_logger
+from util.common.logger import use_logger, base_info
 
 @use_logger(level="err")
 def page_err(msg):
@@ -148,6 +148,32 @@ def create_house_info_db(start=0,num=80):
         lj_db.update_house_info(s)
 
     lj_db.close
+
+def create_house_info_redis(num=20):
+    '''将Redis中缓存的需要重新跑批的房源重新爬虫'''
+    sys.path.append("../..")
+    from module.database import LJDBController
+    from ..redis import LJRedisController
+
+    base_info("开始从Redis内获取房源编号发起请求")
+
+    rds = LJRedisController()
+    lj_db = LJDBController()
+
+    rds.failed_page_insert()
+
+    house_list = rds.failed_page_get(num)
+
+    for house_ids in house_list:
+        house_id_list_req = list()
+        for house_id in house_ids:
+            house_id_list_req.append(house_id[1])
+        s = get_house_infos(house_id_list_req)
+        lj_db.update_house_info(s)
+        rds.success_page_del(house_ids)
+
+    lj_db.close
+    rds.close
 
 if __name__ == "__main__":
     create_house_info_db(num=20)
