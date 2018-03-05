@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 # spider_stat 统计接口分析
 
-import sys
-sys.path.append("../..")
-
 from ..cheat.random_proxies import CheatRequests
 
 from bs4 import BeautifulSoup
@@ -91,7 +88,6 @@ def get_house_stats(hc_id_list):
 
 def create_house_stat_db(start=0,num=80):
     '''将获取到的房源统计信息写入到数据库'''
-    sys.path.append("../..")
     from module.database import LJDBController
 
     lj_db = LJDBController()

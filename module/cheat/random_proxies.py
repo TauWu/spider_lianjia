@@ -2,9 +2,6 @@
 # 代理IP模块 通过切换不同的IP地址欺骗服务
 # 策略：程序运行到0，10,20,30,40,50分时，向代理IP网站申请一批新的IP代理地址
 
-import sys
-sys.path.append("../..")
-
 from util.web.proxies import ProxiesRequests
 from .random_headers import random_headers
 from util.common.logger import use_logger

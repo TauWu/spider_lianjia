@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import sys
-sys.path.append("../..")
-
 from util.database import DBController
 from util.common.logger import use_logger
 

@@ -2,9 +2,6 @@
 
 from ..database import LJDBController
 
-import sys
-sys.path.append("../..")
-
 from util.redis import RedisController
 
 class LJRedisController():

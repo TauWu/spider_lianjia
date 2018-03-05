@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 # spider_page 页面数据分析
 
-import sys
-sys.path.append("../..")
-
 from ..cheat.random_proxies import CheatRequests
 
 from bs4 import BeautifulSoup
@@ -134,7 +131,6 @@ def get_house_infos(house_id_list):
 
 def create_house_info_db(start=0,num=80):
     '''将获取到的房源详情的数据写入到数据库'''
-    sys.path.append("../..")
     from module.database import LJDBController
 
     lj_db = LJDBController()
@@ -151,7 +147,6 @@ def create_house_info_db(start=0,num=80):
 
 def create_house_info_redis(num=20):
     '''将Redis中缓存的需要重新跑批的房源重新爬虫'''
-    sys.path.append("../..")
     from module.database import LJDBController
     from ..redis import LJRedisController
 

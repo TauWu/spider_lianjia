@@ -3,9 +3,6 @@
 # 1.采用广度优先遍历，在页码数量大于100（非正常用户操作）的情况下获取下一级的房源信息
 # 2.将拼接好的URL存入到output文件夹中待用
 
-import sys
-sys.path.append("../..")
-
 import requests
 from bs4 import BeautifulSoup
 from .spider_page import headers
@@ -179,7 +176,6 @@ def create_select_house_info_file(dic_list):
 
 # 将筛选页面中的房源基础信息写入到数据库中
 def create_select_house_info_db(dic_list):
-    sys.path.append("../..")
     from module.database import LJDBController
 
     lj_db = LJDBController()

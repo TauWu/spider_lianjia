@@ -15,9 +15,6 @@ database_info = {
 }
 '''
 
-import sys
-sys.path.append("../..")
-
 from util.common.logger import use_logger
 
 @use_logger(level="warn")
