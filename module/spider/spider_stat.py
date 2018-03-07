@@ -51,7 +51,7 @@ def get_house_stat(house_stat_json):
         except KeyError:
             busi_sold_count = -1
     else:
-        stat_err("接口获取错误！ %s %s"%str(house_stat_json))
+        stat_err("接口获取错误！ %s"%str(house_stat_json))
 
     try:
         return list((position, see_stat_total, see_stat_weekly, community_sold_count, busi_sold_count, str(house_stat_json)))
