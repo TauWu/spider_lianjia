@@ -11,6 +11,7 @@ info = """
 具体操作如下：
 1. 代理设置配置 => ./util/web/config.py
 2. 数据库设置配置 => ./util/database/config.py
+3. Redis设置配置 => ./util/redis/config.py
 ---
 
 是否按顺序全部配置？（Y/N）
@@ -22,6 +23,7 @@ operator_info = """
 【0】 退出程序
 【1】 代理文件设置
 【2】 数据库文件设置
+【3】 Redis文件设置
 ---
 """
 
@@ -52,6 +54,11 @@ database_info = {
 }
 """
 
+redis_config_template = """
+host = "{host}"
+port = {port}
+"""
+
 def proxy_config():
     '''代理程序设置'''
 
@@ -68,6 +75,14 @@ def database_config():
     with open("./util/database/config.py","w") as config:
         config.writelines(db_config_template%passwd)
 
+def redis_config():
+    '''redis设置'''
+
+    host = input("请输入本机Redis-Server的Host")
+    port = input("请输入本机Redis-Server的端口号（默认是6379）")
+    with open("./util/redis/config.py","w") as config:
+        config.writelines(redis_config_template.format(host=host, port=port))
+
 if __name__ == "__main__":
 
     base_info("开始配置一台新机器...")
@@ -78,6 +93,7 @@ if __name__ == "__main__":
     if yorn.strip() == "Y":
         proxy_config()
         database_config()
+        redis_config()
 
     # 用户手动选择需要配置的文件
     elif yorn.strip() == "N":
@@ -95,6 +111,9 @@ if __name__ == "__main__":
             
             elif operator.strip() == "2":
                 database_config()
+            
+            elif operator.strip() == "3":
+                redis_config()
 
             else:
                 continue
