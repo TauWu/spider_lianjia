@@ -52,3 +52,23 @@ CREATE TABLE IF NOT EXISTS `lianjia_house_stat_json` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `house_id` (`house_id`, `insert_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+create view v_lianjia_house_info_count as
+select 
+	case when substr(table_name, 20) <> '' then substr(table_name, 20) else date_format(now(),"%Y%m%d") end as run_date, table_rows as rows
+from 
+	information_schema.tables
+where 
+	TABLE_SCHEMA = 'spider_data' and table_name like "lianjia_house_info%"
+order by 
+	run_date;
+
+create view v_lianjia_house_stat_json_count as
+select 
+	case when substr(table_name, 25) <> '' then substr(table_name, 25) else date_format(now(),"%Y%m%d") end as run_date, table_rows as rows
+from 
+	information_schema.tables
+where 
+	TABLE_SCHEMA = 'spider_data' and table_name like "lianjia_house_stat_json%"
+order by 
+	run_date;
